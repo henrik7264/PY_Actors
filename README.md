@@ -13,7 +13,7 @@ The idea with this library is to create a framework for creating highly performa
 * Reactive Programming (https://reactivex.io)
 * Reactive systems (https://www.reactivemanifesto.org)
 
-This Actors library has noting to do with programming robots, although I would encourage everyone working with robots to give it a try. What I am trying here is actually to create a library/framework for creating reactive systems. Yes, I am going all in here, and there is more to come.
+This Actors library has noting to do with programming robots, although I would encourage everyone working with robots to give it a try. What I am trying here is to create a library/framework for creating reactive systems. Yes, I am going all in here, and there is more to come.
 
 ## Idea
 
