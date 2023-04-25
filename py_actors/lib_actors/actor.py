@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from rx import create, Observable
+from reactivex import create, Observable
 from threading import Lock
 from lib_actors.scheduler import Scheduler
 from lib_actors.dispatcher import Dispatcher

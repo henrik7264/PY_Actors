@@ -315,7 +315,7 @@ class Statemachine:
 
         The update function works as follows: A Worker of the Statemachines class calls update
         with a message that has been published by an Actor. Update will pass this message
-        to the current state by calling its update function.
+        to the current State by calling its update function.
 
         :param msg: A message published by an Actor.
         """
