@@ -21,7 +21,7 @@ This Actors library has noting to do with programming robots, although all the r
 * Reusability
 * Keep it simple
 
-## Installation and Setupt 
+## Installation and Setup
 The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). 
 
 ### Installation of RxPY on Linux
