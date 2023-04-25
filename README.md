@@ -24,7 +24,7 @@ This Actors library has noting to do with programming robots, although all the r
 ## Installation and Setupt 
 The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). 
 
-### Installation of RxPY
+### Installation of RxPY on Linux
 
 ```bash
 pip3 install reactivex
@@ -44,6 +44,15 @@ make install
 ### Installation of the Actors library om Linux
 
 ```bash
-git clone 
+https://github.com/henrik7264/Actors.git
+```
+
+#### Testing the Python Actors library on Linux
+
+```bash
+cd Actors/py_actors
+export PYTHONPATH=`pwd`
+python3 example_publisher_subscriber/main.py
+python3 example_statemachine/main2.py
 ```
 
