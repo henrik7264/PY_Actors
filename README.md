@@ -26,7 +26,7 @@ The Actors library is dependand on the ReactiveX extensions RxPY (see https://gi
 
 1. Install RxPy
 2. Install RxCPP
-3. Install Actor
+3. Install Actors library
 
 ### Installation of RxPY on Linux
 
