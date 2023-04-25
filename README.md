@@ -21,8 +21,22 @@ This Actors library has noting to do with programming robots, although all the r
 * Reusability
 * Keep it simple
 
-However, I have never really 
+## Installation and Setupt 
+The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). 
 
-# Installation
+### Installation of RxPY
 
+```bash
 pip3 install reactivex
+```
+
+### Installation of RxCPP
+
+```bash
+git clone --recursive https://github.com/ReactiveX/RxCpp.git
+cd RxCpp
+mkdir build
+cd build
+cmake ..
+make install 
+```
