@@ -13,11 +13,16 @@ The idea with this library is to create a framework for creating highly performa
 * Reactive Programming (https://reactivex.io)
 * Reactive systems (https://www.reactivemanifesto.org)
 
-This Actors library has noting to do with programming robots, although I would encourage everyone working with robots to give it a try. What I am trying here is to create a library/framework for creating reactive systems. Yes, I am going all in here, and there is more to come.
+This Actors library has noting to do with programming robots, although all the references to ROS. What I am trying here is to create a library/framework for creating reactive systems. Yes, I am going all in here, and there is more to come.
 
 ## Idea
 
+* Low coupling/high cohesion
+* Reusability
+* Keep it simple
 
-Low coupling
-High cohesion
-Keep it simple
+However, I have never really 
+
+# Installation
+
+pip3 install reactivex
