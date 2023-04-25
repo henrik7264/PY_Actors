@@ -13,7 +13,7 @@ The idea with this library is to create a framework for creating highly performa
 * Reactive Programming (https://reactivex.io)
 * Reactive systems (https://www.reactivemanifesto.org)
 
-This Actors library has noting to do with programming robots, although all the references to ROS. What I am trying here is to create a library/framework for creating reactive systems. Yes, I am going all in here, and there is more to come.
+The Actors library has noting to do with programming robots, although all the references to ROS. It is a general purpose library/framework for creating reactive systems.
 
 ## Idea
 
@@ -22,7 +22,11 @@ This Actors library has noting to do with programming robots, although all the r
 * Keep it simple
 
 ## Installation and Setup
-The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). 
+The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must therefore be installed prior to installing the Actors library. The insrallation process is as follows:
+
+1. Install RxPy
+2. Install RxCPP
+3. Install Actor
 
 ### Installation of RxPY on Linux
 
