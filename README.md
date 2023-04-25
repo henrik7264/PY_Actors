@@ -30,7 +30,7 @@ The Actors library is dependand on the ReactiveX extensions RxPY (see https://gi
 pip3 install reactivex
 ```
 
-### Installation of RxCPP
+### Installation of RxCPP on Linux
 
 ```bash
 git clone --recursive https://github.com/ReactiveX/RxCpp.git
@@ -40,3 +40,10 @@ cd build
 cmake ..
 make install 
 ```
+
+### Installation of the Actors library om Linux
+
+```bash
+git clone 
+```
+
