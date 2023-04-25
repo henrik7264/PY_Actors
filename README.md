@@ -48,7 +48,7 @@ make install
 ### Installation of the Actors library om Linux
 
 ```bash
-https://github.com/henrik7264/Actors.git
+git clone https://github.com/henrik7264/Actors.git
 ```
 
 #### Testing the Python Actors library on Linux
