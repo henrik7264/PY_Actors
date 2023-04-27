@@ -21,6 +21,18 @@ The Actors library has noting to do with programming robots, although all the re
 * Reusability
 * Keep it simple
 
+### Project phases
+
+<p align="center">
+  <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase1.jpg" height="600"><br>
+  Phase1: Focus is to provide different features for Actors-
+</p>
+
+<p align="center">
+  <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase2.jpg" height="600"><br>
+  Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
+</p>
+
 ## Installation and Setup
 The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must therefore be installed prior to installing the Actors library. The insrallation process is as follows:
 
