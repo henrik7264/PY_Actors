@@ -45,7 +45,7 @@ cmake ..
 make install 
 ```
 
-### Installation of the Actors library om Linux
+### Installation of the Actors library on Linux
 
 ```bash
 git clone https://github.com/henrik7264/Actors.git
