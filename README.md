@@ -22,7 +22,7 @@ Throughout my career I have always found the following item central for producin
 * Reusability<br>Reusability of code is the use of existing software, or software knowledge,Actors to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library. I just hope the library has the quality that is needed to be used over and over again in many projects.
 * Keep it simple<br>Keep it simple! Well, well, well - I could talk hours about this subject, but this is not the purpose of this project. I think you know what I am talking about, especially if you have tried to take over the maintenance of the code your "dear" colleague produced just before he left the company. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make this code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
 
-It is my hope that the above items are reflected in the code and especially the usage it.  
+It is my hope that the above items are reflected in the code and especially the usage it, and the library provides a solid foundation for creating reactive systems based on Actors.
 
 ### Project phases
 This library is a work in progress, and it will continue to be so probably for many years, but I forsee at least two phases for the library. Phase1 is related to only adding features to the library. This includes:
