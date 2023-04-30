@@ -1,7 +1,7 @@
-# Actors
+# Reactive systems using Actors
 Dear all,
 
-Welcome to an Actors library for C++/Python. You will very soon realize that this is much more that just a library for creating Actors - my hope with this project is to create a framework for creating spectacular software systems.
+Welcome to a C++/Python library for creating reactive systems based on the Actors model.
 
 ## Idea
 The idea with this library is to create a framework for creating highly performant, scalable and maintainable code. My inspiration for this project originates from the following sources:
