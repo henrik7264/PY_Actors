@@ -26,12 +26,17 @@ Low coupling/high cohesion is a central part of the Actors model and therefore a
 
 Reusability of code is the use of existing software, or software knowledge, to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library. I just hope the library has the quality that is needed to be used over and over again in many projects.
 
-Keep it simple! Well, well, well - we could talk a long time about this subject, but this is not the purpose of this project. I think you know what I am talking about, especially if you have tried to take over the maintenance of the code your "dear" colleague had produced. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make the code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
+Keep it simple! Well, well, well - I could talk hours about this subject, but this is not the purpose of this project. I think you know what I am talking about, especially if you have tried to take over the maintenance of the code your "dear" colleague produced just before he left the company. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make this code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
 
 ### Project phases
 
 The project is split in two phases. Phase1 is related to only adding features to the library. This includes:
-* Logging. Logging is one of the most fundamental
+* Logging.<br>Logging is one of the most fundamental debuging facitilities a library shall provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or essentail information about the state of the Actor.
+* Http.<br>A Web page shall be available for each Actor. The purpose of the web page is to provide monitoring of an Actor. More advanced web pages that collects information on the overall application (Actors), will be added later.
+* Statistics.<br>Statistics is like logging essential for debugging your program. It shall be possible to see how many messages of a given type have been published and how long time has gone sine we received the last message.
+* Statemachines<br>State machines are part of nearly all projects . The do however come in many variants and it is always compil
+* Behavir Trees<br>
+* Reactive programming<br>
 * 
 
 <p align="center">
