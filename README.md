@@ -1,7 +1,13 @@
 # Reactive systems using Actors
 Dear all,
 
-Welcome to a C++/Python library for creating reactive systems based on the Actors model.<br>Be aware that the library currently is a work in progress and may change without any notice. This will apply until the first version of the library is released.
+Welcome to a C++/Python library for creating reactive systems based on the Actors model.
+
+Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the featutes discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested (not formanly though) on a 
+* Beaglebone Black (Debian 10.3, Python v3.6)
+* Rasberry Pi 4 (Ubuntu 20,04 server)
+* Portable PC (i7-9750H CPU, Ubuntu 22.04, python 3.10, g++ 11.3) 
+* High end PC (i9-12900k, Fedora 37, Python 3.11)
 
 ## Idea
 The idea with this library is to create a framework for creating highly performant, scalable and maintainable code. My inspiration for this project originates from the following sources:
@@ -13,7 +19,7 @@ The idea with this library is to create a framework for creating highly performa
 * Reactive Programming (https://reactivex.io)
 * Reactive systems (https://www.reactivemanifesto.org)
 
-Although all the references to ROS, the library has as such nothing to do with programming robots. It is a general purpose library/framework for creating reactive systems.
+Although there are several references to ROS, the library has as such nothing to do with programming robots. It is a general purpose library/framework for creating reactive systems.
 
 ## Approach
 I have always found the following items central for producing high quality software
