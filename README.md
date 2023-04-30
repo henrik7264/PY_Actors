@@ -3,7 +3,7 @@ Dear all,
 
 Welcome to a C++/Python library for creating reactive systems based on the Actors model.
 
-Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the featutes discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested informarmaly on a
+Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested informally on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
 * Rasberry Pi 4 (Ubuntu 20,04 server)
 * Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10, g++ v11.3) 
@@ -58,10 +58,10 @@ Now you may think why all the fuss about logging, schedulers and timers. All pro
 ## Required software
 The Reactive_Systems_using_Actors library depends on the following software:
 
-* Python3 (Seen it run on a v3.6)
+* Python3 (Seen it run on a Python v3.6)
 * C++ compiler suporting v17.
 * RxPY v4 (see https://github.com/ReactiveX/RxPY)
-* RxCPP latest version (see https://github.com/ReactiveX/RxCpp)
+* RxCPP v? (see https://github.com/ReactiveX/RxCpp)
 
 ## Installation and setup
 The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY and RxCpp. These two extensions must be installed prior to installing the library. The installation process is as follows:
@@ -102,4 +102,4 @@ python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main2.py
 ```
 
-## Using the Library
+## Using the Library in your project.
