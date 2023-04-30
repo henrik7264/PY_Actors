@@ -27,12 +27,12 @@ It is my hope that the above items are reflected in the code and especially the 
 ### Project phases
 This library is a work in progress, and it will continue to be so probably for many years, but I forsee at least two phases for the library. Phase1 is related to only adding features to the library. This includes:
 
-* Logging<br>Logging is one of the most fundamental debuging facitilities a library shall provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or essentail information about the state of the Actor.
+* Logging<br>Logging is one of the most fundamental debugging facilities a library shall provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or essential information about the state of the Actor.
 * Http<br>A Web page shall be available for each Actor. The purpose of the web page is to provide monitoring of an Actor. More advanced web pages that collects information on the overall application (Actors), will be added later.
 * Statistics<br>Statistics is like logging essential for debugging your program. It shall be possible to see how many messages of a given type have been published and how long time has gone sine we received the last message. Queue sizes and number of worker threads should also be information that easily can be shown. All these information could in principle be shown in a web page. Will be decided at a later time.
 * Scheduling and Timers<br>Scheduling and timer are fundamental of all systems and shall as such be part of this library.
 * State machines<br>State machines are part of nearly all systems. However, they come in many variants/implementations and it is always complicated to understand how they work and what they do. A simple approach to state machines will be presented in this library. The implementation will be very close to the definition of a state machine.
-* Behavir trees<br>Experimental feature that will be added to the library.
+* Behavior trees<br>Experimental feature that will be added to the library.
 * Reactive programming<br>Experiment feature that will be added to the library. Instead of looking at a system that is based on messages that is passed from one Actor to anothor, we could also look at it as system of message streams that are processed by the Actors. When we take that view reactive programming becomes a natural way of processing the messages. See some of the advantages of using reactive programming on ttps://reactivex.io - is awasome.
 
 <p align="center">
@@ -47,11 +47,11 @@ The second phase is only related to create a distributed system of Actors that c
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
 
-Now you may think why all the fuss about logging, scheduler and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports bulding reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a near future as many other features will.
+Now you may think why all the fuss about logging, scheduler and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a near future as many other features will.
 
 
 ## Installation and Setup
-The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must be installed prior to installing the library. The insrallation process is as follows:
+The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must be installed prior to installing the library. The installation process is as follows:
 
 1. Install RxPy
 2. Install RxCPP
