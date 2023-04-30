@@ -24,19 +24,22 @@ Throughout my career as a software developer I have always found the following i
 
 Low coupling/high cohesion is a central part of the Actors model and therefore also a central part of this library. The only way Actors can communicate with each other is through messages. An actor can publish a message and scribe and react to published messages. Each and every actor lives it own life. It will newer break due to major changes in other Actors. The developer can concentrate on developing the best Actor in the wold without ever having to think of how other Actors are implemented. An Actor may start other actors to perform its task. This is high cohesion. The only dependency between Actors are the messages and the properties/data they carries – so designing a system based on Actors is all about creating proper messages that can be distributed and processed by other Actors.
 
-Reusability of code is the use of existing software, or software knowledge, to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). Thi
+Reusability of code is the use of existing software, or software knowledge, to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library. I just hope the library has the quality that is needed to be used over and over again in many projects.
 
-Keep it simple. 
+Keep it simple! Well, well, well - we could talk a long time about this subject, but this is not the purpose of this project. I think you know what I am talking about, especially if you have tried to take over the maintenance of the code your "dear" colleague had produced. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make the code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
 
 ### Project phases
-The project is split in two phases. Phase1 is related to only adding features to the libray. This includes:
-* Logging
+
+The project is split in two phases. Phase1 is related to only adding features to the library. This includes:
+* Logging. Logging is one of the most fundamental
 * 
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase1.png" height="400"><br>
   Phase1: Focus is to provide different features for Actors.
 </p>
+
+The second p
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase2.png" height="400"><br>
