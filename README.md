@@ -1,7 +1,7 @@
 # Reactive systems using Actors
 Dear all,
 
-Welcome to a C++/Python library for creating reactive systems based on the Actors model.
+Welcome to a C++/Python library for creating reactive systems based on the Actors model.<br>Be aware that the library currently is a work in progress and may change without any notice. This will apply until the first version of the library is released.
 
 ## Idea
 The idea with this library is to create a framework for creating highly performant, scalable and maintainable code. My inspiration for this project originates from the following sources:
@@ -20,7 +20,7 @@ I have always found the following items central for producing high quality softw
 
 * Low coupling/high cohesion<br>Low coupling/high cohesion is a central part of the Actors model and therefore also a central part of this library. The only way Actors can communicate with each other is through messages. An actor can publish a message and scribe and react to published messages. Each and every actor lives it own life. It will newer break due to major changes in other Actors. The developer can concentrate on developing the best Actor in the wold without ever having to think of how other Actors are implemented. An Actor may start other actors to perform its task. This is high cohesion. The only dependency between Actors are the messages and the properties/data they carries – so designing a system based on Actors is all about creating proper messages that can be distributed and processed by other Actors.
 * Reusability<br>Reusability of code is the use of existing software, or software knowledge,Actors to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library. I just hope the library has the quality that is needed to be used over and over again in many projects.
-* Keep it simple<br>Keep it simple! Well, well, well - I could talk hours about this subject, but this is not the purpose of this project. I think you know what I am talking about, especially if you have tried to take over the maintenance of the code your "dear" colleague produced just before he left the company. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make this code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
+* Keep it simple<br>Keep it simple! Well, well, well - I could talk hours about this subject, but this is not the purpose of this section. I think you know what I am talking about, especially if you have tried to take over the maintenance of some code your "dear" colleague produced just before he left the company. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make this code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
 
 It is my hope that the above items are reflected in the code and especially the usage it, and that the library provides a solid foundation for creating reactive systems based on Actors.
 
@@ -47,7 +47,7 @@ The second phase is only related to create a distributed system of Actors that c
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
 
-Now you may think why all the fuss about logging, scheduler and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a future version, but remember that they may just as well be implemented by an Actor.
+Now you may think why all the fuss about logging, schedulers and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a future version, but remember that they could just as well be implemented by an Actor.
 
 ## Installation and Setup
 The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must be installed prior to installing the library. The installation process is as follows:
@@ -88,4 +88,4 @@ python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main2.py
 ```
 
-BE WARNED! THE LIBRARY IS IN WORK IN PROGRESS AND MAY CHANGE WITHOUT ANY NOTICE. THIS WILL APPLY UNTIL THE FIRST VERSION HAS BEEN RELEASED.
+## Using the Library
