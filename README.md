@@ -47,16 +47,16 @@ The second phase is only related to create a distributed system of Actors that c
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
 
-Now you may think why all the fuss about logging, scheduler and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports many of task that are required to build a system. What then about configuration, network access, database access etc.? 
+Now you may think why all the fuss about logging, scheduler and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports many of task that are required to build a system. What then about configuration, network access, database access etc.? Yes,  
 
 
 
 ## Installation and Setup
-The Actors library is dependand on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must therefore be installed prior to installing the Actors library. The insrallation process is as follows:
+The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must be installed prior to installing the library. The insrallation process is as follows:
 
 1. Install RxPy
 2. Install RxCPP
-3. Install Actors library
+3. Install Reactive_Systems_using_Actors library
 
 ### Installation of RxPY on Linux
 
@@ -72,21 +72,22 @@ cd RxCpp
 mkdir build
 cd build
 cmake ..
-make install 
+sudo make install 
 ```
 
-### Installation of the Actors library on Linux
+### Installation of the Reactive_Systems_using_Actors library on Linux
 
 ```bash
-git clone https://github.com/henrik7264/Actors.git
+git clone https://github.com/henrik7264/Reactive_Systems_using_Actors.git
 ```
 
-#### Testing the Python Actors library on Linux
+#### Testing the Python library on Linux
 
 ```bash
-cd Actors/py_actors
+cd Reactive_Systems_using_Actors/py_actors
 export PYTHONPATH=`pwd`
 python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main2.py
 ```
 
+BE WARNED! THE LIBRARY IS IN WORK IN PROGRESS AND MAY CHANGE WITHOUT ANY NOTICE. THIS WILL APPLY UNTIL THE FIRST VERSION HAS BEEN RELEASED.
