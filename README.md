@@ -3,11 +3,11 @@ Dear all,
 
 Welcome to a C++/Python library for creating reactive systems based on the Actors model.
 
-Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the featutes discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested (not formanly though) on a 
+Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the featutes discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested informarmaly on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
 * Rasberry Pi 4 (Ubuntu 20,04 server)
-* Portable PC (i7-9750H CPU, Ubuntu 22.04, python 3.10, g++ 11.3) 
-* High end PC (i9-12900k, Fedora 37, Python 3.11)
+* Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10, g++ v11.3) 
+* High end PC (i9-12900k CPU, Fedora 37, Python v3.11, g++ v12.2)
 
 ## Idea
 The idea with this library is to create a framework for creating highly performant, scalable and maintainable code. My inspiration for this project originates from the following sources:
@@ -53,10 +53,18 @@ The second phase is only related to create a distributed system of Actors that c
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
 
-Now you may think why all the fuss about logging, schedulers and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to "the keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a future version, but remember that they could just as well be implemented by an Actor.
+Now you may think why all the fuss about logging, schedulers and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to the "keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a future version, but remember that they could just as well be implemented by an Actor.
 
-## Installation and Setup
-The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY (see https://github.com/ReactiveX/RxPY) and RxCpp (see https://github.com/ReactiveX/RxCpp). These two extensions must be installed prior to installing the library. The installation process is as follows:
+## Required software
+The Reactive_Systems_using_Actors library depends on the following software:
+
+* Python3 (Seen it run on a v3.6)
+* C++ compiler suporting v17.
+* RxPY v4 (see https://github.com/ReactiveX/RxPY)
+* RxCPP latest version (see https://github.com/ReactiveX/RxCpp)
+
+## Installation and setup
+The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY and RxCpp. These two extensions must be installed prior to installing the library. The installation process is as follows:
 
 1. Install RxPy
 2. Install RxCPP
