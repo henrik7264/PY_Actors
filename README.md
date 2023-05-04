@@ -1,7 +1,7 @@
 # Reactive systems using Actors
 Dear all,
 
-Welcome to a C++/Python library for creating reactive systems based on the Actors model.
+Welcome to ReSyAct a C++/Python library for creating Reactive Systems based on the Actors model.
 
 Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested informally on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
@@ -103,7 +103,31 @@ python3 example_statemachine/main2.py
 ```
 
 ## Using the ReSyAct library in your own project.
-OK, now to the more fun part of using the ReSyAct library.
+OK, now to the more fun part of using the ReSyAct library. The following sections will describe messages, how to create actors, schedulers, timers and statemachies.
 
-### Messages
-Messages is one of the most impotrant concepts of the ReSyAct library.
+### Messages (Python)
+Messages is one of the most impotrant concepts of the ReSyAct library. A message is simply a class!
+
+The most simple message consist of nothing more than a class definition:
+
+```python
+class SimpleMsg:
+  pass
+```
+
+Messages may carry data and even functions that can be executed when a message is received:
+
+```python
+class DataMsg:
+    def __init__(self, name: str, count: int):
+        self.name: str = name
+        self.count: int = count
+```
+
+#### Operations message (Python)
+There are two operations which can be applied on messages. That is to subscribe to a message and to publish a message.
+
+
+
+
+
