@@ -24,8 +24,8 @@ Although there are several references to ROS, the library has as such nothing to
 ## Approach
 I have always found the following items central for producing high quality software
 
-* Low coupling/high cohesion<br>Low coupling/high cohesion is a central part of the Actors model and therefore also a central part of this library. The only way Actors can communicate with each other is through messages. An actor can publish a message and scribe and react to published messages. Each and every actor lives it own life. It will newer break due to major changes in other Actors. The developer can concentrate on developing the best Actor in the wold without ever having to think of how other Actors are implemented. An Actor may start other actors to perform its task. This is high cohesion. The only dependency between Actors are the messages and the properties/data they carries – so designing a system based on Actors is all about creating proper messages that can be distributed and processed by other Actors.
-* Reusability<br>Reusability of code is the use of existing software, or software knowledge,Actors to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library. I just hope the library has the quality that is needed to be used over and over again in many projects.
+* Low coupling/high cohesion<br>Low coupling/high cohesion is a central part of the Actors model and therefore also a central part of this library. The only way Actors can communicate with each other is through messages. An actor can publish a message and scribe and react to published messages. Each and every actor lives it own life. It will newer break due to major changes in other Actors. The developer can concentrate on developing the best Actor in the wold without ever having to think of how other Actors are implemented. An Actor may start other actors to perform its task. The only dependency between Actors are the messages and the properties/data they carries – so designing a system based on Actors is all about creating proper messages that can be distributed and processed by other Actors.
+* Reusability<br>Reusability of code is the use of existing software, or software knowledge, to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library. I just hope the library has the quality that is needed to be used over and over again in many projects.
 * Keep it simple<br>Keep it simple! Well, well, well - I could talk hours about this subject, but this is not the purpose of this section. I think you know what I am talking about, especially if you have tried to take over the maintenance of some code your "dear" colleague produced just before he left the company. Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year. I have put a lot of work in make this code easy to read and understand, but it is in the usage of the library that the "keep it simple" statement really should shine through.
 
 It is my hope that the above items are reflected in the code and especially the usage it, and that the library provides a solid foundation for creating reactive systems based on Actors.
@@ -53,7 +53,7 @@ The second phase is only related to create a distributed system of Actors that c
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
 
-Now you may think why all the fuss about logging, schedulers and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to the "keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below. What then about configuration, network access, database access etc.? Yes, they may become interesting in a future version, but remember that they could just as well be implemented by an Actor.
+Now you may think why all the fuss about logging, schedulers and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to the "keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below.
 
 ## Required software
 The Reactive_Systems_using_Actors library depends on the following software:
@@ -68,7 +68,7 @@ The Reactive_Systems_using_Actors library depends on the ReactiveX extensions Rx
 
 1. Install RxPy
 2. Install RxCPP
-3. Install Reactive_Systems_using_Actors library
+3. Install ReSyAct library
 
 ### Installation of RxPY on Linux
 
@@ -87,19 +87,23 @@ cmake ..
 sudo make install 
 ```
 
-### Installation of the Reactive_Systems_using_Actors library on Linux
+### Installation of the ReSyAct library on Linux
 
 ```bash
-git clone https://github.com/henrik7264/Reactive_Systems_using_Actors.git
+git clone https://github.com/henrik7264/ReSyAct.git
 ```
 
 #### Testing the Python library on Linux
 
 ```bash
-cd Reactive_Systems_using_Actors/py_actors
+cd ReSyAct/py_actors
 export PYTHONPATH=`pwd`
 python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main2.py
 ```
 
-## Using the Library in your project.
+## Using the ReSyAct library in your own project.
+OK, now to the more fun part of using the ReSyAct library.
+
+### Messages
+Messages is one of the most impotrant concepts of the ReSyAct library.
