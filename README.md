@@ -1,4 +1,4 @@
-# Reactive systems using Actors
+# Reactive Systems using Actors
 Dear all,
 
 Welcome to ReSyAct a C++/Python library for creating Reactive Systems based on the Actors model.
@@ -33,7 +33,7 @@ It is my hope that the above items are reflected in the code and especially the 
 ### Project phases
 I forsee at least two phases for the library. Phase1 is related to only adding features to the library. This includes:
 
-* Logging<br>Logging is one of the most fundamental debugging facilities a library like this shall provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or information about the state of the Actor.
+* Logging<br>Logging is one of the most fundamental debugging facilities a library like this must provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or information about the state of the Actor.
 * Http<br>A Web page shall be available for each Actor. The purpose of the web page is to provide monitoring of an Actor. More advanced web pages that collects information on the overall application (Actors), will be added later.
 * Statistics<br>Statistics is like logging essential for debugging a program. It shall be possible to see how many messages of a given type have been published and how long time has gone sine we received the last message. Queue sizes and number of worker threads should also be information that easily can be shown. All these information could in principle be shown in a web page. This Will be decided at a later time.
 * Scheduling and Timers<br>Scheduling and timers are fundamental of all systems and shall as such be part of this library.
@@ -53,10 +53,10 @@ The second phase is only related to create a distributed system of Actors that c
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
 
-Now you may think why all the fuss about logging, schedulers and timers. All programming languages provides these facilities either directly or as libraries that easily can be included. My answer to this falls back to the "keep it simple" item. The programmer should be presented with a homogen and coherent interface that supports building reactive systems using Actors - read on it will become more clear in the text below.
+The progress of this library depends a lot on the interest for it and if the overall goals actually are met.
 
 ## Required software
-The Reactive_Systems_using_Actors library depends on the following software:
+The ReSyAct library depends on the following software:
 
 * Python3 (Seen it run on a Python v3.6)
 * C++ compiler suporting v17.
@@ -103,7 +103,7 @@ python3 example_statemachine/main2.py
 ```
 
 ## Using the ReSyAct library in your own project.
-OK, now to the more fun part of using the ReSyAct library. The following sections will describe messages, how to create actors, schedulers, timers and statemachies.
+OK, now to the more fun part of using the ReSyAct library. The following sections describe messages, actors, schedulers, timers and statemachies. As the library expands new features will be added.
 
 ### Messages (Python)
 Messages is one of the most impotrant concepts of the ReSyAct library. A message is simply a class!
@@ -124,10 +124,54 @@ class DataMsg:
         self.count: int = count
 ```
 
-#### Operations message (Python)
-There are two operations which can be applied on messages. That is to subscribe to a message and to publish a message.
+#### Operations on messages (Python)
+There are two operations which can be applied on messages. That is to subscribe to a message and to publish a message. The sequence diagam below how 
+
+<p align="center">
+  <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Publish_Subscribe.png"><br>
+  Sequence diagram showing the subscribe and publish mechanism of the ReSyAct Library.
+</p>
 
 
+##### Syntax
+         Message function - The Actor will subscribe to the specified message type
+            and call the callback function each time a message of the specified type is published
 
+```python
+def subscribe(self, msg_type, func) -> None:
 
+msg_type: A reference to a class/message.
+func: A lambda or callback function. The function must take a message argument of the specified type.
 
+```
+##### Example
+            """
+```python
+                self.message.subscribe(MyMessage, self.func)
+                def func(self, msg: MyMessage):
+                    self.logger.debug("Received a MyMessage: " + msg.data)
+
+```
+
+```python
+
+        def publish(self, msg) -> None:
+            """
+            Message function - The Actor will publish the specified message.
+            Example:
+                self.message.publish(MyMessage("Hello world")
+            :param msg: The message (instance of a class) to be published.
+            """
+```
+
+```python
+        def stream(self, msg_type) -> Observable:
+            """
+            Message function - This function will return a rx.Observable stream
+            of messages of the specified message type.
+            Example:
+                observable = self.message.stream(MyMessage)
+                observable.subscribe(...)
+            :param msg_type: A reference to a class/message.
+            """
+```
