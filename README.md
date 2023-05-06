@@ -5,7 +5,7 @@ Welcome to ReSyAct a C++/Python library for creating Reactive Systems based on t
 
 Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested informally on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
-* Rasberry Pi 4 (Ubuntu 20,04 server)
+* Raspberry Pi 4 (Ubuntu 20,04 server)
 * Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10, g++ v11.3) 
 * High end PC (i9-12900k CPU, Fedora 37, Python v3.11, g++ v12.2)
 
@@ -31,7 +31,7 @@ I have always found the following items central for producing high quality softw
 It is my hope that the above items are reflected in the code and especially the usage it, and that the library provides a solid foundation for creating reactive systems based on Actors.
 
 ### Project phases
-I forsee at least two phases for the library. Phase1 is related to only adding features to the library. This includes:
+I foresee at least two phases for the library. Phase1 is related to only adding features to the library. This includes:
 
 * Logging<br>Logging is one of the most fundamental debugging facilities a library like this must provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or information about the state of the Actor.
 * Http<br>A Web page shall be available for each Actor. The purpose of the web page is to provide monitoring of an Actor. More advanced web pages that collects information on the overall application (Actors), will be added later.
@@ -64,7 +64,7 @@ The ReSyAct library depends on the following software:
 * RxCPP v? (see https://github.com/ReactiveX/RxCpp)
 
 ## Installation and setup
-The Reactive_Systems_using_Actors library depends on the ReactiveX extensions RxPY and RxCpp. These two extensions must be installed prior to installing the library. The installation process is as follows:
+The ReSyAct library depends on the ReactiveX extensions RxPY and RxCpp. These two extensions must be installed prior to installing the library. The installation process is as follows:
 
 1. Install RxPy
 2. Install RxCPP
@@ -103,10 +103,10 @@ python3 example_statemachine/main2.py
 ```
 
 ## Using the ReSyAct library in your own project.
-OK, now to the more fun part of using the ReSyAct library. The following sections describe messages, actors, schedulers, timers and statemachies. As the library expands new features will be added.
+OK, now to the more fun part of using the ReSyAct library. The following sections describe messages, actors, schedulers, timers and state machies. As the library expands new features will be added.
 
 ### Messages (Python)
-Messages is one of the most impotrant concepts of the ReSyAct library. A message is simply a class!
+Messages is one of the most important concepts of the ReSyAct library. A message is simply a class!
 
 The most simple message consist of nothing more than a class definition:
 
@@ -161,7 +161,7 @@ def publish(self, msg) -> None:
 self.message.publish(MyMessage("Hello world", 1234))
 ```
 
-The sequence diagam below show how the subscription and publish of messages work. The Actor starts by subscribing to a number of messages (message types). A callback function is associated to each subscription. 
+The sequence diagram below show how the subscription and publish of messages work. The Actor starts by subscribing to a number of messages (message types). A callback function is associated to each subscription. 
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Publish_Subscribe.png"><br>
@@ -171,11 +171,11 @@ The sequence diagam below show how the subscription and publish of messages work
 Each time a message is published by an Actor the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution. The published message reach the 
 
 There are some problems related to this architecture:
-1. While executing one callback funtion another message may be published and trigger another callback function. This could in worse case lead to thread synchonisation problems. The ReSyAct library solves this problem by allowing only one callback function per Actoror to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback funtion at a time.
-2. A heavy message load may create the situation described in item 1. To accomodate for this problem the ReSyAct library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
+1. While executing one callback function another message may be published and trigger another callback function. This could in worse case lead to thread synchronization problems. The ReSyAct library solves this problem by allowing only one callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback function at a time.
+2. A heavy message load may create the situation described in item 1. To accommodate for this problem the ReSyAct library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
 
 ### Actors (Python)
-Actors is like messages a central part of the ReSyAct library. All Actors are subclasses of an Actor class 
+Actors is like messages a central part of the ReSyAct library. All Actors are sub-classes of an Actor class 
 
 #### Creation of an Actor
 ```python
@@ -184,21 +184,37 @@ class MyActor(Actor):
             super().__init__("MyActor", logging.NOTSET)
 ```
 
-It is as simle as that to create an Actor! The Actor takes as argument the The name of the Actor. It must be a unique name that is easy to indentify in e.x. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
+It is as simple as that! The Actor takes as argument the name of the Actor. It must be a unique name that is easy to identify in ex. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
 
-To initialize all Atcors 
+Initialization of an Actor simply consist of creating an instance of it. It can be done anywhere and at any time. The Actor instance must exists throughout the lifetime of the application.
 
 ```python
-from example_publisher_subscriber.publish_actor import Publisher
-from example_publisher_subscriber.subscribe_actor import Subscriber
-
 if __name__ == "__main__":
     # Initialize actors
-    actors = [Publisher(), Subscriber()]
+    actors = [MyActor(), AnotherActor(), AThirdActor()]
     ...
 ```
 
-An Actor is a facade to message handling, scheduling, logging etc. 
+An Actor is a facade to message handling, scheduling, logging etc. As soon we are in the scope of an Actor all the functions will be available. This includes:
+
+self.message.subscribe(...)
+self.message.publish(...)
+self.message.stream(...)
+
+self.logger.debug(...)
+self.logger.info(...)
+self.logger.warning(...)
+self.logger.error(...)
+self.logger.critical(...)
+
+self.scheduler.once(...)
+self.scheduler.repeat(...)
+self.scheduler.remove(...)
+
+self.tmer = Timer(...)
+self.sm = Statemachine(...)
+
+Observe how the functions are organized into logical groups - this makes it very easy to understand and use. Only Timer and Statemachine 
 
 ### Logging (Python)
 
@@ -206,6 +222,6 @@ An Actor is a facade to message handling, scheduling, logging etc.
 
 ### Timers (Python)
 
-### State Machines
+### State Machines (Python)
 
 ### Message Streams (Python)
