@@ -118,60 +118,82 @@ class SimpleMsg:
 Messages may carry data and even functions that can be executed when a message is received:
 
 ```python
-class DataMsg:
+class MyMessage:
     def __init__(self, name: str, count: int):
         self.name: str = name
         self.count: int = count
 ```
 
 #### Operations on messages (Python)
-There are two operations which can be applied on messages. That is to subscribe to a message and to publish a message. The sequence diagam below how 
+There are two operations which can be applied on messages: That is to subscribe to a message and to publish a message.
+
+#### Subscribe to a Message
+The Actor will subscribe to the specified message type and call the callback function each time a message of the specified type is published.
+
+##### Syntax 
+```python
+def subscribe(self, msg_type, func) -> None:
+
+# msg_type: A reference to a class/message.
+# func: A lambda or callback function. The function must take a message argument of the specified type.
+```
+
+##### Example
+```python
+self.message.subscribe(MyMessage, self.func)
+
+def func(self, msg: MyMessage):
+  self.logger.debug("Received a MyMessage: " + msg.name + ", " + str(msg.count))
+```
+
+#### Publish a Message
+The Actor will publish the specified message.
+
+##### Syntax
+```python
+def publish(self, msg) -> None:
+
+# msg: The message (instance of a class) to be published.
+```
+
+##### Example
+```python
+self.message.publish(MyMessage("Hello world", 1234))
+```
+
+The sequence diagam below show how the subscription and publish of messages work. The Actor starts by subscribing to a number of messages (message types). A callback function is associated to each subscription. 
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Publish_Subscribe.png"><br>
   Sequence diagram showing the subscribe and publish mechanism of the ReSyAct Library.
 </p>
 
+Each time a message is published by an Actor the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution. The published message does at such not reach the Actors that have subscribed to it, but the associated callback function will be executed.
 
-##### Syntax
-         Message function - The Actor will subscribe to the specified message type
-            and call the callback function each time a message of the specified type is published
+There are some problems related to architecture:
+1. While executing one callback funtion another message may be published and trigger another callback function. This could in worse case lead to thread synchonisation problems. The ReSyAct library solves this problem by allowing only one callback function per Actoror to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback funtion at a time.
+2. A heavy message load may create the situation described in item 1. To accomodate for this problem the ReSyAct library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
 
+### Actors (Python)
+Actors is like messages a central part of the ReSyAct library. All Actors are subclasses of an Actor class 
+
+#### Creation of an Actor
 ```python
-def subscribe(self, msg_type, func) -> None:
-
-msg_type: A reference to a class/message.
-func: A lambda or callback function. The function must take a message argument of the specified type.
-
-```
-##### Example
-            """
-```python
-                self.message.subscribe(MyMessage, self.func)
-                def func(self, msg: MyMessage):
-                    self.logger.debug("Received a MyMessage: " + msg.data)
-
+class MyActor(Actor):
+        def __init__(self):
+            super().__init__("MyActor", logging.NOTSET)
 ```
 
-```python
+It is as simle as that to create an Actor! The Actor takes as argument the The name of the Actor. It must be a unique name that is easy to indentify in e.x. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
 
-        def publish(self, msg) -> None:
-            """
-            Message function - The Actor will publish the specified message.
-            Example:
-                self.message.publish(MyMessage("Hello world")
-            :param msg: The message (instance of a class) to be published.
-            """
-```
+An Actor is a facade to message handling, scheduling, logging etc. 
 
-```python
-        def stream(self, msg_type) -> Observable:
-            """
-            Message function - This function will return a rx.Observable stream
-            of messages of the specified message type.
-            Example:
-                observable = self.message.stream(MyMessage)
-                observable.subscribe(...)
-            :param msg_type: A reference to a class/message.
-            """
-```
+### Logging (Python)
+
+### Schedulers (Python)
+
+### Timers (Python)
+
+### State Machines
+
+### Message Streams (Python)
