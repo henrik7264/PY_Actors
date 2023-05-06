@@ -125,10 +125,10 @@ class MyMessage:
 ```
 
 #### Operations on messages (Python)
-There are two operations which can be applied on messages: That is to subscribe to a message and to publish a message.
+There are two operations which can be applied on messages: This is to subscribe to a message and to publish a message.
 
 #### Subscribe to a Message
-The Actor will subscribe to the specified message type and call the callback function each time a message of the specified type is published.
+The Actor will subscribe to a specified message type and call the callback function each time a message of the specified type is published.
 
 ##### Syntax 
 ```python
