@@ -168,9 +168,9 @@ The sequence diagam below show how the subscription and publish of messages work
   Sequence diagram showing the subscribe and publish mechanism of the ReSyAct Library.
 </p>
 
-Each time a message is published by an Actor the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution. The published message does at such not reach the Actors that have subscribed to it, but the associated callback function will be executed.
+Each time a message is published by an Actor the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution. The published message reach the 
 
-There are some problems related to architecture:
+There are some problems related to this architecture:
 1. While executing one callback funtion another message may be published and trigger another callback function. This could in worse case lead to thread synchonisation problems. The ReSyAct library solves this problem by allowing only one callback function per Actoror to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback funtion at a time.
 2. A heavy message load may create the situation described in item 1. To accomodate for this problem the ReSyAct library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
 
@@ -185,6 +185,18 @@ class MyActor(Actor):
 ```
 
 It is as simle as that to create an Actor! The Actor takes as argument the The name of the Actor. It must be a unique name that is easy to indentify in e.x. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
+
+To initialize all Atcors 
+
+```python
+from example_publisher_subscriber.publish_actor import Publisher
+from example_publisher_subscriber.subscribe_actor import Subscriber
+
+if __name__ == "__main__":
+    # Initialize actors
+    actors = [Publisher(), Subscriber()]
+    ...
+```
 
 An Actor is a facade to message handling, scheduling, logging etc. 
 
