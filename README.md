@@ -197,22 +197,22 @@ if __name__ == "__main__":
 
 An Actor is a facade to message handling, scheduling, logging etc. As soon we are in the scope of an Actor all the functions will be available. This includes:
 
-self.message.subscribe(...)
-self.message.publish(...)
-self.message.stream(...)
+self.message.subscribe(...)<br>
+self.message.publish(...)<br>
+self.message.stream(...)<br>
 
-self.logger.debug(...)
-self.logger.info(...)
-self.logger.warning(...)
-self.logger.error(...)
-self.logger.critical(...)
+self.logger.debug(...)<br>
+self.logger.info(...)<br>
+self.logger.warning(...)<br>
+self.logger.error(...)<br>
+self.logger.critical(...)<br>
 
-self.scheduler.once(...)
-self.scheduler.repeat(...)
-self.scheduler.remove(...)
+self.scheduler.once(...)<br>
+self.scheduler.repeat(...)<br>
+self.scheduler.remove(...)<br>
 
-self.tmer = Timer(...)
-self.sm = Statemachine(...)
+self.tmer = Timer(...)<br>
+self.sm = Statemachine(...)<br>
 
 Observe how the functions are organized into logical groups - this makes it very easy to understand and use. Only Timer and Statemachine 
 
