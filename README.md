@@ -214,7 +214,7 @@ self.scheduler.remove(...)<br>
 self.tmer = Timer(...)<br>
 self.sm = Statemachine(...)<br>
 
-Observe how the functions are organized into logical groups - this makes it very easy to understand and use. Only Timer and Statemachine 
+Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage. 
 
 ### Logging (Python)
 
