@@ -103,12 +103,27 @@ python3 example_statemachine/main2.py
 ```
 
 ## Using the ReSyAct library in your own project.
-OK, now to the more fun part of using the ReSyAct library. The following sections describe messages, actors, schedulers, timers and state machies. As the library expands new features will be added.
+OK, now to the more fun part of using the ReSyAct library. The following sections describe messages, actors, schedulers, timers and state machines. As the library expands new features will be added.
+
+### Project setup (Python)
+There is currently no installation packages for the ReSyAct library. The code is simply indented to be included directly in your project. Copy the lib_actors folder directly into your project and start to create new actors:
+
+```bash
+YouProject/
+  lib_actors/
+  ...
+  actor1/
+  actor2/
+  ...
+  main.py
+```
+
+The provided examples should provide enough information of how to use the ReSyAct library.
 
 ### Messages (Python)
-Messages is one of the most important concepts of the ReSyAct library. A message is simply a class!
+Messages are one of the most important concepts of the ReSyAct library. A message is simply a class!
 
-The most simple message consist of nothing more than a class definition:
+The most simple message consist of nothing but a class definition:
 
 ```python
 class SimpleMsg:
@@ -128,7 +143,7 @@ class MyMessage:
 There are two operations which can be applied on messages: This is to subscribe to a message and to publish a message.
 
 #### Subscribe to a Message
-The Actor will subscribe to a specified message type and call the callback function each time a message of the specified type is published.
+The Actor will subscribe to a specified message type and call the callback function each time a message of that type is published.
 
 ##### Syntax 
 ```python
