@@ -120,8 +120,8 @@ YouProject/
 
 A number of examples are provided as part of the Actors library. They should provide enough information to setup your development environment.
 
-## hkjhkhjk
-The following sections describe messages, actors, schedulers, timers and state machines. As the library expands new features will be add
+## Features of the Actor library
+The following sections describe messages, actors, schedulers, timers and state machines. As the library expands new features will be added
 
 ### Messages (Python)
 Messages are one of the most important concepts of the Actors library. A message is simply a class!
@@ -146,7 +146,7 @@ class MyMessage:
 There are two operations which can be applied on messages: This is to subscribe to a message and to publish a message.
 
 #### Subscribe to a Message
-The Actor will subscribe to a specified message type and call the callback function each time a message of that type is published.
+An Actor will subscribe to a specific message type by providing a callback function that is executed each time a message of that type is published.
 
 ##### Syntax 
 ```python
@@ -165,7 +165,7 @@ def func(self, msg: MyMessage):
 ```
 
 #### Publish a Message
-The Actor will publish the specified message.
+The Actor will publish the specified message. 
 
 ##### Syntax
 ```python
@@ -179,21 +179,21 @@ def publish(self, msg) -> None:
 self.message.publish(MyMessage("Hello world", 1234))
 ```
 
-The sequence diagram below show how the subscription and publish of messages work. The Actor starts by subscribing to a number of messages (message types). A callback function is associated to each subscription. 
+The sequence diagram below shows how the subscription and publishing of messages work. The Actor starts by subscribing to a number of messages (message types). A callback function is associated to each subscription. Each time a message is published the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution.
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Publish_Subscribe.png"><br>
   Sequence diagram showing the subscribe and publish mechanism of the Actors Library.
 </p>
 
-Each time a message is published by an Actor the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution. The published message reach the 
-
-There are some problems related to this architecture:
+There are some problems related to this execution model/architecture:
 1. While executing one callback function another message may be published and trigger another callback function. This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing only one callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback function at a time.
-2. A heavy message load may create the situation described in item 1. To accommodate for this problem the Actors library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
+2. A heavy message load may create the situation described in item 1. To accommodate for this problem, the Actors library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
+
+The problems described above are common for this kind of architecture - well, for any archecture I guess. There is no real solution to the problem except that the architect and programmer must ensure that the hardware platform is dimentioned to the message load of the system and that the callback functions are fast and responsive. Avoid sleep, wait and I/O operations in callback functions that are called often - this can lead to problems.
 
 ### Actors (Python)
-Actors is like messages a central part of the Actors library. All Actors are sub-classes of an Actor class 
+Actors are, like messages, a central part of the Actors library. All Actors are sub-classes of an Actor class 
 
 #### Creation of an Actor
 ```python
@@ -209,11 +209,11 @@ Initialization of an Actor simply consist of creating an instance of it. It can 
 ```python
 if __name__ == "__main__":
     # Initialize actors
-    actors = [MyActor(), AnotherActor(), AThirdActor()]
+    actors = [MyActor(), ASecondActor(), AThirdActor()]
     ...
 ```
 
-An Actor is a facade to message handling, scheduling, logging etc. As soon we are in the scope of an Actor all the functions will be available. This includes:
+An Actor is implemented as a facade to message handling, scheduling, logging etc. As soon we are in the scope of an Actor all the functions will be available. This includes:
 
 self.message.subscribe(...)<br>
 self.message.publish(...)<br>
@@ -232,7 +232,7 @@ self.scheduler.remove(...)<br>
 self.tmer = Timer(...)<br>
 self.sm = Statemachine(...)<br>
 
-Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage. 
+Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage/nature. 
 
 ### Logging (Python)
 
