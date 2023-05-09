@@ -229,7 +229,7 @@ self.scheduler.once(...)<br>
 self.scheduler.repeat(...)<br>
 self.scheduler.remove(...)<br>
 
-self.tmer = Timer(...)<br>
+self.timer = Timer(...)<br>
 self.sm = Statemachine(...)<br>
 
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage/nature. 
