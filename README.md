@@ -1,9 +1,9 @@
 # Reactive Systems using Actors
 Dear all,
 
-Welcome to ReSyAct a C++/Python library for creating Reactive Systems based on the Actors model.
+Welcome to Actors - a C++/Python library for creating Reactive Systems based on the Actors model.
 
-Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library have been tested informally on a
+Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library has been tested informally on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
 * Raspberry Pi 4 (Ubuntu 20,04 server)
 * Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10, g++ v11.3) 
@@ -56,7 +56,7 @@ The second phase is only related to create a distributed system of Actors that c
 The progress of this library depends a lot on the interest for it and if the overall goals actually are met.
 
 ## Required software
-The ReSyAct library depends on the following software:
+The Actors library depends on the following software:
 
 * Python3 (Seen it run on a Python v3.6)
 * C++ compiler suporting v17.
@@ -64,11 +64,11 @@ The ReSyAct library depends on the following software:
 * RxCPP v? (see https://github.com/ReactiveX/RxCpp)
 
 ## Installation and setup
-The ReSyAct library depends on the ReactiveX extensions RxPY and RxCpp. These two extensions must be installed prior to installing the library. The installation process is as follows:
+The Actors library depends on the ReactiveX extensions RxPY and RxCpp. These two extensions must be installed prior to installing the library. The installation process is as follows:
 
 1. Install RxPy
 2. Install RxCPP
-3. Install ReSyAct library
+3. Install Actors library
 
 ### Installation of RxPY on Linux
 
@@ -87,26 +87,26 @@ cmake ..
 sudo make install 
 ```
 
-### Installation of the ReSyAct library on Linux
+### Installation of the Actors library on Linux
 
 ```bash
-git clone https://github.com/henrik7264/ReSyAct.git
+git clone https://github.com/henrik7264/Actors.git
 ```
 
 #### Testing the Python library on Linux
 
 ```bash
-cd ReSyAct/py_actors
+cd Actors/py_actors
 export PYTHONPATH=`pwd`
 python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main2.py
 ```
 
-## Using the ReSyAct library in your own project.
-Now to the more fun part of using the ReSyAct library. 
+## Using the Actors library in your own project.
+Now to the more fun part of using the Actors library. 
 
 ### Project setup (Python)
-There is currently no installation packages for the ReSyAct library. The code is simply indented to be included directly in your project. Copy the lib_actors folder directly into your project and start to create new actors as described below:
+There is currently no installation packages for the Actors library. The code is simply indented to be included directly in your project. Copy the lib_actors folder directly into your project and start to create new actors as described below:
 
 ```bash
 YouProject/
@@ -118,13 +118,13 @@ YouProject/
   main.py
 ```
 
-A number of examples are provided as part of the ReSyAct library. They should provide enough information of how to use the ReSyAct library.
+A number of examples are provided as part of the Actors library. They should provide enough information to setup your development environment.
 
 ## hkjhkhjk
 The following sections describe messages, actors, schedulers, timers and state machines. As the library expands new features will be add
 
 ### Messages (Python)
-Messages are one of the most important concepts of the ReSyAct library. A message is simply a class!
+Messages are one of the most important concepts of the Actors library. A message is simply a class!
 
 The most simple message consist of nothing but a class definition:
 
@@ -183,17 +183,17 @@ The sequence diagram below show how the subscription and publish of messages wor
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Publish_Subscribe.png"><br>
-  Sequence diagram showing the subscribe and publish mechanism of the ReSyAct Library.
+  Sequence diagram showing the subscribe and publish mechanism of the Actors Library.
 </p>
 
 Each time a message is published by an Actor the set of callback functions that have subscribed to the message will be executed. This takes place in the Dispatcher where a number of Worker threads will take care of the execution. The published message reach the 
 
 There are some problems related to this architecture:
-1. While executing one callback function another message may be published and trigger another callback function. This could in worse case lead to thread synchronization problems. The ReSyAct library solves this problem by allowing only one callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback function at a time.
-2. A heavy message load may create the situation described in item 1. To accommodate for this problem the ReSyAct library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
+1. While executing one callback function another message may be published and trigger another callback function. This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing only one callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback function at a time.
+2. A heavy message load may create the situation described in item 1. To accommodate for this problem the Actors library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
 
 ### Actors (Python)
-Actors is like messages a central part of the ReSyAct library. All Actors are sub-classes of an Actor class 
+Actors is like messages a central part of the Actors library. All Actors are sub-classes of an Actor class 
 
 #### Creation of an Actor
 ```python
