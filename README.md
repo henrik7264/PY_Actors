@@ -103,10 +103,10 @@ python3 example_statemachine/main2.py
 ```
 
 ## Using the ReSyAct library in your own project.
-OK, now to the more fun part of using the ReSyAct library. The following sections describe messages, actors, schedulers, timers and state machines. As the library expands new features will be added.
+Now to the more fun part of using the ReSyAct library. 
 
 ### Project setup (Python)
-There is currently no installation packages for the ReSyAct library. The code is simply indented to be included directly in your project. Copy the lib_actors folder directly into your project and start to create new actors:
+There is currently no installation packages for the ReSyAct library. The code is simply indented to be included directly in your project. Copy the lib_actors folder directly into your project and start to create new actors as described below:
 
 ```bash
 YouProject/
@@ -118,7 +118,10 @@ YouProject/
   main.py
 ```
 
-The provided examples should provide enough information of how to use the ReSyAct library.
+A number of examples are provided as part of the ReSyAct library. They should provide enough information of how to use the ReSyAct library.
+
+## hkjhkhjk
+The following sections describe messages, actors, schedulers, timers and state machines. As the library expands new features will be add
 
 ### Messages (Python)
 Messages are one of the most important concepts of the ReSyAct library. A message is simply a class!
