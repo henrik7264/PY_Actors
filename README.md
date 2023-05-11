@@ -204,7 +204,7 @@ class MyActor(Actor):
 
 It is as simple as that! The Actor takes as argument the name of the Actor. It must be a unique name that is easy to identify in ex. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
 
-Initialization of an Actor consist of creating an instance of it. It can be done anywhere and at any time. The Actor instance must exists throughout the lifetime of the application.
+Initialization of an Actor consist of creating an instance of it. It can be done anywhere and at any time - Even an Actor may create new Actors that will. The Actor instance must exists throughout the lifetime of the application.
 
 ```python
 if __name__ == "__main__":
@@ -252,8 +252,8 @@ self.logger.critical(msg, *args, **kwargs)
 self.logger.info("Received a MyMessage: " + msg.name + ", " + str(msg.count))
 ```
 
-will produce the following log entry:  
-  2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
+will produce the following log entry:
+    2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
 
 
 ### Schedulers (Python)
