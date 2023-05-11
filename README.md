@@ -190,7 +190,7 @@ There are some problems related to this execution model/architecture:
 1. While executing one callback function another message may be published and trigger another callback function. This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing only one callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions, but one Actor can only execute one callback function at a time.
 2. A heavy message load may create the situation described in item 1. To accommodate for this problem, the Actors library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
 
-The problems described above are common for this kind of architecture - well, for any archecture I guess. There is no real solution to the problem except that the architect and programmer must ensure that the hardware platform is dimentioned to the message load of the system and that the callback functions are fast and responsive. Avoid sleep, wait and I/O operations in callback functions that are called often.
+The problems described above are common for this kind of architecture. There is no real solution to the problem except that the architect and programmer must ensure that the hardware platform is dimentioned to the message load of the system and that the callback functions are fast and responsive. Avoid sleep, wait and I/O operations in callback functions that are called often.
 
 ### Actors (Python)
 Actors are, like messages, a central part of the Actors library. All Actors are sub-classes of an Actor class 
@@ -204,7 +204,7 @@ class MyActor(Actor):
 
 It is as simple as that! The Actor takes as argument the name of the Actor. It must be a unique name that is easy to identify in ex. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
 
-Initialization of an Actor simply consist of creating an instance of it. It can be done anywhere and at any time. The Actor instance must exists throughout the lifetime of the application.
+Initialization of an Actor consist of creating an instance of it. It can be done anywhere and at any time. The Actor instance must exists throughout the lifetime of the application.
 
 ```python
 if __name__ == "__main__":
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     ...
 ```
 
-An Actor is implemented as a facade to message handling, scheduling, logging etc. As soon we are in the scope of an Actor all the functions will be available. This includes:
+An Actor is implemented as a facade. As soon we are in the scope of an Actor a set of functions becomes available. This includes:
 
 self.message.subscribe(...)<br>
 self.message.publish(...)<br>
@@ -235,6 +235,26 @@ self.sm = Statemachine(...)<br>
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage/nature. 
 
 ### Logging (Python)
+The logging interface of the Actors library is based on the Python logging library. The library has been slightly adapted so the name of the actor  is included in the log message. 
+
+#### Syntax
+
+```python
+self.logger.debug(msg, *args, **kwargs)<br>
+self.logger.info(msg, *args, **kwargs)<br>
+self.logger.warning(msg, *args, **kwargs)<br>
+self.logger.error(msg, *args, **kwargs)<br>
+self.logger.critical(msg, *args, **kwargs)
+```
+
+### Example
+```python
+self.logger.info("Received a MyMessage: " + msg.name + ", " + str(msg.count))
+```
+
+will produce the following log entry:  
+  2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
+
 
 ### Schedulers (Python)
 
