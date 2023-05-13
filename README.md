@@ -216,19 +216,19 @@ if __name__ == "__main__":
 An Actor is implemented as a facade. As soon we are in the scope of an Actor a set of functions becomes available. This includes:
 
 ```python
-self.message.subscribe(...)<br>
-self.message.publish(...)<br>
-self.message.stream(...)<br>
+self.message.subscribe(...)
+self.message.publish(...)
+self.message.stream(...)
 
-self.logger.debug(...)<br>
-self.logger.info(...)<br>
-self.logger.warning(...)<br>
-self.logger.error(...)<br>
-self.logger.critical(...)<br>
+self.logger.debug(...)
+self.logger.info(...)
+self.logger.warning(...)
+self.logger.error(...)
+self.logger.critical(...)
 
-self.scheduler.once(...)<br>
-self.scheduler.repeat(...)<br>
-self.scheduler.remove(...)<br>
+self.scheduler.once(...)
+self.scheduler.repeat(...)
+self.scheduler.remove(...)
 
 self.timer = Timer(...)<br>
 self.sm = Statemachine(...)<br>
@@ -241,10 +241,10 @@ The logging interface of the Actors library is based on the Python logging libra
 
 #### Usage
 ```python
-self.logger.debug(msg, *args, **kwargs)<br>
-self.logger.info(msg, *args, **kwargs)<br>
-self.logger.warning(msg, *args, **kwargs)<br>
-self.logger.error(msg, *args, **kwargs)<br>
+self.logger.debug(msg, *args, **kwargs)
+self.logger.info(msg, *args, **kwargs)
+self.logger.warning(msg, *args, **kwargs)
+self.logger.error(msg, *args, **kwargs)
 self.logger.critical(msg, *args, **kwargs)
 ```
 The msg is the message format string, and the args are the arguments which are merged into msg using the string formatting operator (source https://docs.python.org/3/library/logging.html).
