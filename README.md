@@ -204,7 +204,7 @@ class MyActor(Actor):
 
 It is as simple as that! The Actor takes as argument the name of the Actor. It must be a unique name that is easy to identify in ex. log message. The second argument is the log level. The default log level is set to CRITICAL. Set it to logging.NOTSET to log everything.
 
-Initialization of an Actor consist of creating an instance of it. It can be done anywhere and at any time - Even an Actor may create new Actors that will. The Actor instance must exists throughout the lifetime of the application.
+Initialization of an Actor consist of creating an instance of it. It can be done from anywhere and at any time - Even an Actor may create new Actors. The instance of an Actor must exists throughout the lifetime of the application. 
 
 ```python
 if __name__ == "__main__":
@@ -215,6 +215,7 @@ if __name__ == "__main__":
 
 An Actor is implemented as a facade. As soon we are in the scope of an Actor a set of functions becomes available. This includes:
 
+```python
 self.message.subscribe(...)<br>
 self.message.publish(...)<br>
 self.message.stream(...)<br>
@@ -231,14 +232,14 @@ self.scheduler.remove(...)<br>
 
 self.timer = Timer(...)<br>
 self.sm = Statemachine(...)<br>
+```
 
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage/nature. 
 
 ### Logging (Python)
-The logging interface of the Actors library is based on the Python logging library. The library has been slightly adapted so the name of the actor  is included in the log message. 
+The logging interface of the Actors library is based on the Python logging library. The Python library has been slightly adapted so the name of the actor is included in the log message. Default is to log to a terminal and a file named actors.log. All features of Python's logging library are available, and 
 
 #### Syntax
-
 ```python
 self.logger.debug(msg, *args, **kwargs)<br>
 self.logger.info(msg, *args, **kwargs)<br>
@@ -252,9 +253,8 @@ self.logger.critical(msg, *args, **kwargs)
 self.logger.info("Received a MyMessage: " + msg.name + ", " + str(msg.count))
 ```
 
-will produce the following log entry:
+The code will produce the following log entry:
     2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
-
 
 ### Schedulers (Python)
 
