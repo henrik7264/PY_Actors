@@ -237,7 +237,7 @@ self.sm = Statemachine(...)<br>
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage/nature. 
 
 ### Logging (Python)
-The logging interface of the Actors library is based on the Python logging library. The Python library has been slightly adapted so the name of the actor is included in the log message. Default is to log to a terminal and a file named "actors.log", and the log level is per default set to CRITICAL. The log level can be changed during creation of the Actor. All features of the Python logging library are available and can be changed if needed. It is however important to use the interface to log messages:
+The logging interface of the Actors library is based on the Python logging library. The Python library has been slightly adapted so the name of the actor is included in the log message. Default is to log to a terminal and a file named "actors.log", and the log level is set to CRITICAL. The log level can be changed during creation of the Actor. All features of the Python logging library are available and can be changed if needed. It is however important to use the interface to log messages:
 
 #### Usage
 ```python
@@ -246,9 +246,8 @@ self.logger.info(msg, *args, **kwargs)<br>
 self.logger.warning(msg, *args, **kwargs)<br>
 self.logger.error(msg, *args, **kwargs)<br>
 self.logger.critical(msg, *args, **kwargs)
-
-# The msg is the message format string, and the args are the arguments which are merged into msg using the string formatting operator. (Note that this means that you can use keywords in the format string, together with a single dictionary argument.) No % formatting operation is performed on msg when no args are supplied. (source https://docs.python.org/3/library/logging.html)
 ```
+The msg is the message format string, and the args are the arguments which are merged into msg using the string formatting operator (source https://docs.python.org/3/library/logging.html).
 
 ### Example
 ```python
@@ -259,7 +258,7 @@ The code will produce the following log entry:<br>
 2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
 
 ### Schedulers (Python)
-Schedulers are a simple timing mechanism. We can at any time ask the scheduler to perform at task (function call) after a given time. The task can executed once or repeated until it is removed. The scheduler interface is as follows:
+Schedulers are a simple timing mechanism. It can be used to perform at task (function call) after a given time. The task can executed once or repeated until it is removed. The scheduler interface is as follows:
 
 #### Syntax
 ```python
