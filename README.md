@@ -39,7 +39,7 @@ I foresee at least two phases for the library. Phase1 is related to only adding 
 * Scheduling and Timers<br>Scheduling and timers are fundamental of all systems and shall as such be part of this library.
 * State machines<br>State machines are part of nearly all systems. However, they come in many variants/implementations and it is always complicated to understand how they work and what they do. A simple approach to state machines will be presented in this library. The implementation will be very close to the definition of a state machine.
 * Behavior trees<br>Experimental feature that will be added to the library.
-* Reactive programming<br>Experimental feature that will be added to the library. Instead of looking at a system that is based on parsning messages from one Actor to anothor, we could also look at it as system of message streams that are processed by the Actors. When we take that view reactive programming becomes a natural way of processing the messages. See some of the advantages of using reactive programming on ttps://reactivex.io - they are awasome.
+* Reactive programming<br>Experimental feature that will be added to the library. Instead of looking at a system that is based on parsing messages from one Actor to anothor, we could also look at it as system of message streams that are processed by the Actors. When we take this view reactive programming becomes a natural way of processing the messages. See some of the advantages of using reactive programming on ttps://reactivex.io - they are awasome.
 
 <p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase1.png" height="400"><br>
