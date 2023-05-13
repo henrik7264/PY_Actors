@@ -239,7 +239,7 @@ Observe how the functions are organized into logical groups. This makes it very 
 ### Logging (Python)
 The logging interface of the Actors library is based on the Python logging library. The Python library has been slightly adapted so the name of the actor is included in the log message. Default is to log to a terminal and a file named "actors.log", and the log level is set to CRITICAL. The log level can be changed during creation of the Actor. All features of the Python logging library are available and can be changed if needed. It is however important to use the interface to log messages:
 
-#### Usage
+#### Interface
 ```python
 self.logger.debug(msg, *args, **kwargs)
 self.logger.info(msg, *args, **kwargs)
