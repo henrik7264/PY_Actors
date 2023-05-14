@@ -230,14 +230,14 @@ self.scheduler.once(...)
 self.scheduler.repeat(...)
 self.scheduler.remove(...)
 
-self.timer = Timer(...)<br>
-self.sm = Statemachine(...)<br>
+self.timer = Timer(...)
+self.sm = Statemachine(...)
 ```
 
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them. Only Timer and Statemachine are a bit different due to their usage/nature. 
 
 ### Logging (Python)
-The logging interface of the Actors library is based on the Python logging library. The Python library has been slightly adapted so the name of the actor is included in the log message. Default is to log to a terminal and a file named "actors.log", and the log level is set to CRITICAL. The log level can be changed during creation of the Actor. All features of the Python logging library are available and can be changed if needed. It is however important to use the interface to log messages:
+The logging interface of the Actors library is based on the Python logging library. The Python library has been slightly adapted so that the name of the Actor is included in the log message. Default is to log to a terminal and a file named "actors.log", and the log level is set to CRITICAL. The log level can be changed during creation of the Actor. In fact, all features of the Python logging library are available and can be changed if needed. It is however recommended to use the following interface to log messages:
 
 #### Interface
 ```python
@@ -257,8 +257,32 @@ self.logger.info("Received a MyMessage: " + msg.name + ", " + str(msg.count))
 The code will produce the following log entry:<br>
 2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
 
-### Schedulers (Python)
-Schedulers are a simple timing mechanism. It can be used to perform at task (function call) after a given time. The task can executed once or repeated until it is removed. The scheduler interface is as follows:
+### Scheduler (Python)
+A Scheduler is a timing mechanism. It can be used to execute at task (function call) at a given time. The task can be executed once or repeated until it is removed. The scheduled tasks are executed by an adaptable number of Workers. If the 
+
+
+
+The scheduler interface is defined as follows:
+
+#### Schedule a task once
+
+
+##### Syntax 
+```python
+def once(self, msec: int, func) -> int:
+
+# msec: timeout in milliseconds.
+# func: call back function to be executed when the job times out.
+return: job_id
+```
+
+##### Example
+```python
+job_id = self.message.subscribe(MyMessage, self.func)
+
+def func(self, msg: MyMessage):
+  self.logger.debug("Received a MyMessage: " + msg.name + ", " + str(msg.count))
+```
 
 #### Syntax
 ```python
