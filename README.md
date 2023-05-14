@@ -255,8 +255,9 @@ self.logger.info("Received a MyMessage: " + msg.name + ", " + str(msg.count))
 ```
 
 The code will produce the following log entry:
-
+```
 2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
+```
 
 ### Scheduler (Python)
 A Scheduler is a timing mechanism. It can be used to execute a task (function call) at a given time. The task can be executed once or repeated until it is removed. The scheduled tasks are executed by an adaptable number of Workers. If the Workers are not able to execute the tasks as requested by the secheduler additional Workers will be started to execute the tasks. This situaltion happens when many tasks are scheduled at the same time. The situation is not different from handling messages (see above section) - in fact it is exctaly the same and the Actors library will behave the same way:
