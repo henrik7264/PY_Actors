@@ -260,17 +260,18 @@ The code will produce the following log entry:
 ```
 
 ### Scheduler (Python)
-A Scheduler is a timing mechanism. It can be used to execute a task (function call) at a given time. The task can be executed once or repeated until it is removed. The scheduled tasks are executed by an adaptable number of Workers. If the Workers are not able to execute the tasks as requested by the secheduler additional Workers will be started to execute the tasks. This situaltion happens when many tasks are scheduled at the same time. The situation is not different from handling messages (see above section) - in fact it is exctaly the same and the Actors library will behave the same way:
+A Scheduler can be used to execute a task (function call) at a given time. The task can be executed once or repeated until it is removed. The scheduled tasks are executed by an adaptable number of Workers. If the Workers are not able to execute the tasks as requested by the secheduler additional Workers will be started. This situaltion happens when many tasks are scheduled at the same time. The situation is not different from handling messages (see above section) - in fact it is exctaly the same, and the Actors library will behave the same way:
 
-1. While executing one task/callback function another task may be triggered by a scheduler timeout or a published message. This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing only one task/callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 tasks/callback functions, but one Actor can only execute one callback function at a time.
-2. A heavy message or scheduler load may create the situation described in item 1. To accommodate for this problem, the Actors library will adapt the number of Workers , i.e. another Worker will be added to the Dispatcher/Scheduler if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
+1. While executing one task another task may be triggered by a scheduler timeout. This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing only one task per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 tasks, but one Actor can only execute one task at a time.
+2. A heavy scheduler load may create the situation described in item 1. To accommodate for this problem, the Actors library will adapt the number of Workers, i.e. another Worker will be added if the tasks cannot be handled as fast as they are triggered. This can in worse case lead to a large amount Workers (threads).
+3. Scheduled tasks and message handling works under the same principle as described above. Only one task/callback function can be executed at time per Actor to avoid synchronization problems.
 
-Again, the Actors library will do what it can to solve the problem, but the root cause of the problem is a insufficient hardware platform and/or poor implementations of the tasts/callback functions. It is in these two areas the problem should be resolved.
+Again, the Actors library will do what it can to solve the problem, but the root cause of the problem is an insufficient hardware platform and/or poor implementations of the tasts/callback functions. It is in these two areas the problem should be resolved.
 
 The scheduler interface is defined as follows:
 
 #### Schedule a task once
-A task can be executed once at a given time by the Scheduler.  It is possible to to cancel/remove the canceled time
+A task can be executed once at a given time by the Scheduler. The once function will return a job id that can be used to cancel/remove the scheduled job.
 
 ##### Syntax 
 ```python
@@ -283,9 +284,49 @@ def once(self, msec: int, func) -> int:
 
 ##### Example
 ```python
-job_id = self.scheduler.once(1000, self.func)
+job_id = self.scheduler.once(1000, self.task)
 
-def func(self):
+def task(self):
+  self.logger.debug("The scheduled job timedout.")
+```
+
+#### Schedule a repeating task
+A job can be scheduled to repeat a task . The repeat function will return a job id that can be used to cancel/remove the scheduled job.
+
+##### Syntax 
+```python
+def repeat(self, msec: int, func) -> int:
+
+# msec: timeout in milliseconds.
+# func: call back function to be executed when the job times out.
+# return: job_id
+```
+
+##### Example
+```python
+job_id = self.scheduler.repeat(1000, self.task)
+
+def task(self):
+  self.logger.debug("The scheduled job timedout.")
+```
+
+#### Remove a scheduled jobk
+A scheduled job can at any time be canceled/emoved.
+
+##### Syntax 
+```python
+def remoce(self, job_id: int) -> None:
+
+# job_id: job to be removed.
+```
+
+##### Example
+```python
+job_id = self.scheduler.repeat(1000, self.task)
+
+self.scheduler.remove(job_id)
+
+def task(self):
   self.logger.debug("The scheduled job timedout.")
 ```
 
