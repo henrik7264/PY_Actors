@@ -311,51 +311,70 @@ def task(self):
   self.logger.debug("The scheduled job timedout.")
 ```
 
-#### Remove a scheduled jobk
+#### Remove a scheduled job
 A scheduled job can at any time be canceled/emoved.
 
 ##### Syntax 
 ```python
-def remoce(self, job_id: int) -> None:
+def remove(self, job_id: int) -> None:
 
 # job_id: job to be removed.
 ```
 
 ##### Example
 ```python
-job_id = self.scheduler.repeat(1000, self.task)
+job_id = self.scheduler.repeat(1000, self.task)  # A new job has been scheduled.
 
-self.scheduler.remove(job_id)
+self.scheduler.remove(job_id)  # The job is canceled and removed.
 ```
 
 ### Timers (Python)
 Timers are simular to schedulers, execpt a timer must be started before it is activated. A timer can at anytime be stoped or restarted if needed. The timer has a timeout and a callback function. The timer will be actived when started and when it timesout the callback function will be exected.
 
 #### Create a timer
-A timer is created 
+A timer is created as an instance of the Timer class. It takes a timeout time and a callback function as argument. The Timer is activated at the moment it is started.
 
 ```python
 timer = Timer(1000, self.func)  # Create a timer
-timer.start()  # Start the timer.
-
+timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+...
 timer.stop()  # Stop the timer.
+...
+timer.start() # Restart the timer.
 ```
+
+#### Start a timer
 
 ##### Syntax 
 ```python
-def once(self, msec: int, func) -> int:
-
-# msec: timeout in milliseconds.
-# func: call back function to be executed when the job times out.
-# return: job_id
+def start(self) -> None:
 ```
 
 ##### Example
 ```python
-job_id = self.scheduler.once(1000, self.task)
+timer = Timer(1000, self.func)  # Create a timer
+timer.start()  # Start the timer. It will timeout 1000ms from this moment.
 
-def task(self):
-  self.logger.debug("The scheduled job timedout.")
+def func(self):
+  self.logger.debug("The timer timedout.")
+```
+
+#### Stop a timer
+
+##### Syntax 
+```python
+def stop(self) -> None:
+```
+
+##### Example
+```python
+timer = Timer(1000, self.func)  # Create a timer
+timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+
+timer.stop()  # Stop the timer.
+
+def func(self):
+  self.logger.debug("The timer timedout.")
 ```
 
 
