@@ -4,7 +4,7 @@ Dear all,
 Welcome to Actors - a C++/Python library for creating Reactive Systems based on the Actors model.
 
 ## Status
-Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library has been tested informally on a
+The library is currently a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library has been tested informally on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
 * Raspberry Pi 4 (Ubuntu 20,04 server)
 * Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10, g++ v11.3) 
@@ -31,7 +31,7 @@ I have always found the following items central for producing high quality softw
 
 It is my hope that the above items are reflected in the code and especially the usage it, and that the library provides a solid foundation for creating reactive systems based on Actors.
 
-### Project phases
+## Project phases
 I foresee at least two phases for the library. Phase1 is related to only adding features to the library. This includes:
 
 * Logging<br>Logging is one of the most fundamental debugging facilities a library like this must provide. It shall be easy to enable and use. A log entry shall contain a time stamp, severity, which Actor created the entry and a text that describes a problem or information about the state of the Actor.
@@ -329,7 +329,35 @@ self.scheduler.remove(job_id)
 ```
 
 ### Timers (Python)
-Timers are simular to schedulers, execpt a timer must be started before it will be activated. A timer can at anytime be stop or restarted if needed. The 
+Timers are simular to schedulers, execpt a timer must be started before it is activated. A timer can at anytime be stoped or restarted if needed. The timer has a timeout and a callback function. The timer will be actived when started and when it timesout the callback function will be exected.
+
+#### Create a timer
+A timer is created 
+
+```python
+timer = Timer(1000, self.func)  # Create a timer
+timer.start()  # Start the timer.
+
+timer.stop()  # Stop the timer.
+```
+
+##### Syntax 
+```python
+def once(self, msec: int, func) -> int:
+
+# msec: timeout in milliseconds.
+# func: call back function to be executed when the job times out.
+# return: job_id
+```
+
+##### Example
+```python
+job_id = self.scheduler.once(1000, self.task)
+
+def task(self):
+  self.logger.debug("The scheduled job timedout.")
+```
+
 
 ### State Machines (Python)
 
