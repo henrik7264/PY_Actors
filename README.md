@@ -3,6 +3,7 @@ Dear all,
 
 Welcome to Actors - a C++/Python library for creating Reactive Systems based on the Actors model.
 
+## Status
 Be aware that the library currently is a work in progress and may change without any notice. An early version of the Python library is available. It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below. The C++ version will soon be ready and added to the repository with the same set of features. The library has been tested informally on a
 * Beaglebone Black (Debian 10.3, Python v3.6)
 * Raspberry Pi 4 (Ubuntu 20,04 server)
@@ -264,9 +265,9 @@ A Scheduler can be used to execute a task (function call) at a given time. The t
 
 1. While executing one task another task may be triggered by a scheduler timeout. This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing only one task per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 tasks, but one Actor can only execute one task at a time.
 2. A heavy scheduler load may create the situation described in item 1. To accommodate for this problem, the Actors library will adapt the number of Workers, i.e. another Worker will be added if the tasks cannot be handled as fast as they are triggered. This can in worse case lead to a large amount Workers (threads).
-3. Scheduled tasks and message handling works under the same principle as described above. Only one task/callback function can be executed at time per Actor to avoid synchronization problems.
+3. Scheduled tasks and message handling works under the same principles as described above. Only one task/callback function can be executed at time per Actor to avoid synchronization problems.
 
-Again, the Actors library will do what it can to solve the problem, but the root cause of the problem is an insufficient hardware platform and/or poor implementations of the tasts/callback functions. It is in these two areas the problem should be resolved.
+Again, the Actors library will do what it can to solve the load problems, but the root cause of the problem is an insufficient hardware platform and/or poor implementations of the tasts/callback functions. It is in these two areas the problem should be resolved.
 
 The scheduler interface is defined as follows:
 
@@ -325,12 +326,10 @@ def remoce(self, job_id: int) -> None:
 job_id = self.scheduler.repeat(1000, self.task)
 
 self.scheduler.remove(job_id)
-
-def task(self):
-  self.logger.debug("The scheduled job timedout.")
 ```
 
 ### Timers (Python)
+Timers are simular to schedulers, execpt a timer must be started before it will be activated. A timer can at anytime be stop or restarted if needed. The 
 
 ### State Machines (Python)
 
