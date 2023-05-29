@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 from lib_actors.scheduler import Scheduler
 
 
 class Timer:
     """
-    The Timer class is a simple implementation of timer function.
+<    The Timer class is a simple implementation of timer function.
     A Timer can be stated and stopped at any time.
     When the timer times out its callback function is called.
 
@@ -40,13 +41,20 @@ class Timer:
         :param msec: timeout in milliseconds.
         :param func: call back function to be executed when the timer times out.
         """
+
         self.msec = msec
         self.func = func
+        self.cb_func = func
+        self.lock = None
+        actor = inspect.currentframe().f_back.f_locals["self"]  # Dirty trick to get the Actor instance.
+        if hasattr(actor, "lock"):
+            self.lock = actor.lock  # Lock from Actor to synchronize callback functions
+            self.cb_func = self._locked_func
         self.job_id = None
 
-    def __del__(self):
-        if self.job_id is not None:
-            Scheduler.get_instance().remove(self.job_id)
+    def _locked_func(self):
+        with self.lock:
+            self.func()
 
     def stop(self):
         """
@@ -55,16 +63,18 @@ class Timer:
         Example:
             timer.stop()
         """
+
         if self.job_id is not None:
             Scheduler.get_instance().remove(self.job_id)
             self.job_id = None
 
     def start(self):
         """
-        Starts or restarts a timer.
+        Starts or restarts the timer.
 
-        Example:
+        Example:f_back
             timer.start()
         """
+
         self.stop()
-        self.job_id = Scheduler.get_instance().once(self.msec, self.func)
+        self.job_id = Scheduler.get_instance().once(self.msec, self.cb_func)

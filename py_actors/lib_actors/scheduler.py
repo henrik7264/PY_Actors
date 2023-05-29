@@ -54,6 +54,7 @@ class Scheduler(Thread):
         """
         Do not create instances of this class! Scheduler is a singleton.
         """
+
         super().__init__(daemon=True)
         self.job_id = 0  # unique id that is returned each time a job is scheduled.
         self.jobs = {}  # { job_id1: (timeout1, msec1, f1, repeat1), job_id2: (timeout2, msec2, f2, repeat2), ...}
@@ -74,6 +75,7 @@ class Scheduler(Thread):
 
         :return: an instance of the Scheduler class.
         """
+
         if Scheduler.__instance__ is None:
             Scheduler.__instance__ = Scheduler()
         return Scheduler.__instance__
@@ -115,6 +117,7 @@ class Scheduler(Thread):
         :param func: call back function to be executed when the job times out.
         :return: job_id
         """
+
         with self.lock:
             self.job_id += 1
             self.jobs[self.job_id] = (time()+float(msec)/1000.0, msec, func, 1)
@@ -132,6 +135,7 @@ class Scheduler(Thread):
         :param func: call back function to be executed when the job times out.
         :return: job id
         """
+
         with self.lock:
             self.job_id += 1
             self.jobs[self.job_id] = (time()+float(msec)/1000.0, msec, func, sys.maxsize)
@@ -149,6 +153,7 @@ class Scheduler(Thread):
 
         :param job_id: the job to be removed.
         """
+
         with self.lock:
             if self.jobs.get(job_id) is not None:
                 self.jobs.pop(job_id)

@@ -27,7 +27,7 @@ class SMachine(Actor):
         class States(Enum):
             DOOR_OPENED = 0,
             DOOR_CLOSED = 1
-        self.sm = Statemachine(self, States.DOOR_CLOSED,
+        self.sm = Statemachine(States.DOOR_CLOSED,
                        State(States.DOOR_CLOSED,
                              MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
                        State(States.DOOR_OPENED,

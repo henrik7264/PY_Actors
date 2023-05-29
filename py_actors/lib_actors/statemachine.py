@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 from typing import cast
 from enum import Enum
 from queue import Queue
@@ -64,6 +65,7 @@ class Transition:
         :param action: A callback function that is executed each time a transition is triggered.
         :param next_state: The next state of the statemachine. Set as part of a transition is triggered.
         """
+
         self.statemachine = None
         self.trans_type = trans_type
         self.action = action
@@ -101,6 +103,7 @@ class MessageTrans(Transition):
         :param action: A callback function that is executed when the transition is triggered.
         :param next_state: The next state of the statemachine when then transition is complete.
         """
+
         super().__init__(trans_type=TransitionType.MESSAGE, action=action, next_state=next_state)
         self.msg_type = msg_type
 
@@ -112,6 +115,7 @@ class MessageTrans(Transition):
 
         :param msg: A message published by an Actor.
         """
+
         with self.statemachine.lock:
             if self.action is not None:
                 self.action(msg)
@@ -138,6 +142,7 @@ class TimerTrans(Transition):
         :param action: A callback function that is executed when the transition is triggered.
         :param next_state: The next state of the statemachine when then transition is complete.
         """
+
         super().__init__(trans_type=TransitionType.TIMER, action=action, next_state=next_state)
         self.timeout = timeout
 
@@ -147,6 +152,7 @@ class TimerTrans(Transition):
 
         Actual execution of the action callback function of the transition.
         """
+
         with self.statemachine.lock:
             if self.action is not None:
                 self.action()
@@ -188,6 +194,7 @@ class State:
         :param state_name: The name of a State, typically an enum, i.e. integer.
         :param transitions: A number of transitions that when triggered will change the state of the statemachine.
         """
+
         self.state_name = state_name  # typically an enum, i.e. integer
         self.transitions = transitions  # The transitions of a state
         self.message_dict = {}  # {MsgType1: Trans1, MsgType2: Trans2, ...}
@@ -208,6 +215,7 @@ class State:
 
         :param statemachine: A Statemachine.
         """
+
         for trans in self.transitions:
             trans.set_statemachine(statemachine)
 
@@ -221,6 +229,7 @@ class State:
 
         :param msg: A message published by an Actor.
         """
+
         trans = self.message_dict.get(type(msg))
         if trans is not None:
             trans.update(msg)
@@ -247,7 +256,7 @@ class Statemachine:
     The trigger of a transition is either a Message or Timer.
     """
 
-    def __init__(self, actor, initial_state, *states: State):
+    def __init__(self, initial_state, *states: State):
         """
         A statemachine is defined by an initial state and a number of states it can change to at any given time
 
@@ -255,18 +264,20 @@ class Statemachine:
             class States(Enum):
                 DOOR_OPENED = 0,
                 DOOR_CLOSED = 1
-            self.sm = Statemachine(self, States.DOOR_CLOSED,
+            self.sm = Statemachine(States.DOOR_CLOSED,
                            State(States.DOOR_CLOSED,
                                  MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
                            State(States.DOOR_OPENED,
                                  MessageTrans(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
                                  TimerTrans(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 
-        :param actor: The Actor that defines the statemachine. Needed to get the lock of the Actor.
         :param initial_state: The initial state of the Statemachine
         :param states: A number of states of the statemachine.
         """
-        self.lock = actor.lock  # Shared lock with Actor
+
+        actor = inspect.currentframe().f_back.f_locals["self"]  # Dirty trick to get the Actor instance.
+        assert(hasattr(actor, "lock"))
+        self.lock = actor.lock  # Lock from Actor to synchronize callback functions
         self.current_state = None  # Current state of the Statemachine, typically an enum, i.e. integer
         self.states = states  # The states of a statemachine
         self.state_dict = {}  # { name1: State1, name2: State2, ...}, name is typically an enum, i.e. integer
@@ -287,6 +298,7 @@ class Statemachine:
 
         :return: Current state of the statemachine. Typically, an enum or integer.
         """
+
         return self.current_state
 
     def set_current_state(self, new_state):
@@ -298,6 +310,7 @@ class Statemachine:
 
         :param new_state: The new/current state of the statemachine.
         """
+
         for job_id in self.scheduled_jobs:
             self.scheduler.remove(job_id)
         self.scheduled_jobs = []
@@ -319,6 +332,7 @@ class Statemachine:
 
         :param msg: A message published by an Actor.
         """
+
         state = self.state_dict.get(self.current_state)
         if state is not None:
             state.update(msg)
@@ -345,6 +359,7 @@ class Statemachines(Thread):
         """
         The Worker class takes care of executing the (update function, statemachine) pair that is pushed to its queue.
         """
+
         def __init__(self, worker_queue: Queue):
             super().__init__(daemon=True)
             self.worker_queue = worker_queue  # Shared queue with statemachines
@@ -359,6 +374,7 @@ class Statemachines(Thread):
         """
         Do not create instances of this class! Statemachines is a singleton.
         """
+
         super().__init__(daemon=True)
         self.statemachines_dict = {}  # {MsgType1: [sm1, sm2], MsgType2: [sm33], ...}
         self.worker_queue = Queue()  # Queue of statemachines to be updated.
@@ -370,13 +386,14 @@ class Statemachines(Thread):
     @staticmethod
     def get_instance():
         """
-         The Statemachines class is a singleton and should only be accessed through this function.
+        The Statemachines class is a singleton and should only be accessed through this function.
 
-         Example:
-             statemachines = Statemachines.get_instance()
+        Example:
+            statemachines = Statemachines.get_instance()
 
-         :return: an instance of the Statemachines class.
-         """
+        :return: an instance of the Statemachines class.
+        """
+
         if Statemachines.__instance__ is None:
             Statemachines.__instance__ = Statemachines()
         return Statemachines.__instance__
@@ -395,11 +412,12 @@ class Statemachines(Thread):
 
     def register(self, statemachine: Statemachine):
         """
-         Registers a statemachine.
+        Registers a statemachine.
 
-         Example:
-             Statemachines.get_instance().register(statemachine)
-         """
+        Example:
+            Statemachines.get_instance().register(statemachine)
+        """
+
         if statemachine is not None:
             for state in statemachine.states:
                 for trans in state.transitions:

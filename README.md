@@ -100,7 +100,7 @@ git clone https://github.com/henrik7264/Actors.git
 cd Actors/py_actors
 export PYTHONPATH=`pwd`
 python3 example_publisher_subscriber/main.py
-python3 example_statemachine/main2.py
+python3 example_statemachine/main.py
 ```
 
 ## Using the Actors library in your own project.
