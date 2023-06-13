@@ -1,19 +1,18 @@
 # Reactive Systems using Actors
 Dear all,
 
-Welcome to Actors - a C++/Python library for creating Reactive Systems based on the Actors model.
+Welcome to Actors - a Python library for creating Reactive Systems based on the Actors model.
 
 ## Status
 The library is currently a work in progress and may change without any notice. 
 An early version of the Python library is available. 
 It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below.
-The C++ version will soon be ready and added to the repository with the same set of features.
 The library has been tested informally on a
 
 * Beaglebone Black (Debian 10.3, Python v3.6)
 * Raspberry Pi 4 (Ubuntu 20,04 server)
-* Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10, g++ v11.3) 
-* High end PC (i9-12900k CPU, Fedora 37, Python v3.11, g++ v12.2)
+* Portable PC (i7-9750H CPU, Ubuntu 22.04, Python v3.10) 
+* High end PC (i9-12900k CPU, Fedora 37, Python v3.11)
 
 ## Idea
 The idea with this library is to create a framework for creating highly performant, scalable and maintainable code.
@@ -96,18 +95,15 @@ The progress of this library depends a lot on the interest for it and if the ove
 The Actors library depends on the following software:
 
 * Python3 (Seen it run on a Python v3.6)
-* C++ compiler suporting v17.
 * RxPY v4 (see https://github.com/ReactiveX/RxPY)
-* RxCPP v? (see https://github.com/ReactiveX/RxCpp)
 
 ## Installation and setup
-The Actors library depends on the ReactiveX extensions RxPY and RxCpp. 
-These two extensions must be installed prior to installing the library. 
+The Actors library depends on the ReactiveX extensions RxPY
+This extensions must be installed prior to installing the library. 
 The installation process is as follows:
 
 1. Install RxPy
-2. Install RxCPP
-3. Install Actors library
+2. Install Actors library
 
 ### Installation of RxPY on Linux
 
@@ -115,27 +111,16 @@ The installation process is as follows:
 pip3 install reactivex
 ```
 
-### Installation of RxCPP on Linux
-
-```bash
-git clone --recursive https://github.com/ReactiveX/RxCpp.git
-cd RxCpp
-mkdir build
-cd build
-cmake ..
-sudo make install 
-```
-
 ### Installation of the Actors library on Linux
 
 ```bash
-git clone https://github.com/henrik7264/Actors.git
+git clone https://github.com/henrik7264/PY_Actors.git
 ```
 
 #### Testing the Python library on Linux
 
 ```bash
-cd Actors/py_actors
+cd Actors/PY_Actors
 export PYTHONPATH=`pwd`
 python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main.py
@@ -144,7 +129,7 @@ python3 example_statemachine/main.py
 ## Using the Actors library in your own project.
 Now to the more fun part of using the Actors library. 
 
-### Project setup (Python)
+### Project setup
 There is currently no installation packages for the Actors library.
 The code is simply indented to be included directly in your project.
 Copy the lib_actors folder directly into your project and start to create new actors as described below:
@@ -166,10 +151,10 @@ They should provide enough information to setup your development environment.
 The following sections describe messages, actors, schedulers, timers and state machines.
 As the library expands new features will be added
 
-### Messages (Python)
+### Messages 
 Messages are one of the most important concepts of the Actors library. A message is simply a class!
 
-The most simple message consist of nothing but a class definition:
+The most simple message consists of nothing but a class definition:
 
 ```python
 class SimpleMsg:
@@ -185,14 +170,14 @@ class MyMessage:
         self.count: int = count
 ```
 
-#### Operations on messages (Python)
+#### Operations on messages
 There are two operations which can be applied on messages: This is to subscribe to a message and to publish a message.
 
 #### Subscribe to a Message
-An Actor will subscribe to a specific message type by providing a callback function
+An Actor subscribes to a specific message type by providing a callback function
 that is executed each time a message of that type is published.
 
-##### Syntax 
+##### subscribe functiom 
 ```python
 def subscribe(self, msg_type, func) -> None:
 
@@ -209,9 +194,9 @@ def func(self, msg: MyMessage):
 ```
 
 #### Publish a Message
-The Actor will publish the specified message. 
+The Actor publishes messages by means of the publish function. 
 
-##### Syntax
+##### publish function
 ```python
 def publish(self, msg) -> None:
 
@@ -237,7 +222,7 @@ This takes place in the Dispatcher where a number of Worker threads will take ca
 There are some problems related to this execution model/architecture:
 1. While executing one callback function another message may be published and trigger another callback function.
    This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing
-   only one callback function per Actor to execute at a time, i.e. 100 Actors can concurrently execute 100 callback functions,
+   only one callback function per Actor to be executed at a time, i.e. 100 Actors can concurrently execute 100 callback functions,
    but one Actor can only execute one callback function at a time.
 2. A heavy message load may create the situation described in item 1. To accommodate for this problem,
    the Actors library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher
@@ -248,8 +233,8 @@ There is no real solution to the problem except that the architect and programme
 that the hardware platform is dimensioned to the message load of the system and that the callback functions are fast and responsive.
 Avoid sleep, wait and I/O operations in callback functions that are called often.
 
-### Actors (Python)
-Actors are, like messages, a central part of the Actors library. All Actors are sub-classes of an Actor class:
+### Actors
+Actors are, like messages, a central part of the Actors library. All Actors are sub-classes of the Actor class:
 
 #### Creation of an Actor
 ```python
@@ -298,7 +283,7 @@ self.sm = Statemachine(...)
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them.
 Only Timer and Statemachine are a bit different due to their usage/nature. 
 
-### Logging (Python)
+### Logging
 The logging interface of the Actors library is based on the Python logging library.
 The Python library has been slightly adapted so that the name of the Actor is included in the log message. 
 Default is to log to a terminal and a file named "actors.log", and the log level is set to CRITICAL. 
@@ -306,7 +291,7 @@ The log level can be changed during creation of the Actor.
 In fact, all features of the Python logging library are available and can be changed if needed. 
 It is however recommended to use the following interface to log messages:
 
-#### Interface
+#### Logging Interface
 ```python
 self.logger.debug(msg, *args, **kwargs)
 self.logger.info(msg, *args, **kwargs)
@@ -355,7 +340,7 @@ The scheduler interface is defined as follows:
 #### Schedule a task once
 A task can be executed once at a given time by the Scheduler. The once function will return a job id that can be used to cancel/remove the scheduled job.
 
-##### Syntax 
+##### once function
 ```python
 def once(self, msec: int, func) -> int:
 
@@ -376,7 +361,7 @@ def task(self):
 A job can be scheduled to repeat a task.
 The repeat function will return a job id that can be used to cancel/remove the scheduled job.
 
-##### Syntax 
+##### repeat functiom 
 ```python
 def repeat(self, msec: int, func) -> int:
 
@@ -413,15 +398,15 @@ self.scheduler.remove(job_id)  # The job is canceled and removed.
 ### Timers (Python)
 Timers are simular to schedulers, except a timer must be started before it is activated.
 A timer can at anytime be stopped or restarted if needed. The timer has a timeout and a callback function.
-The timer will be activated when started and when it times out the callback function will be executed.
+The timer is activated when it is started, and when it times out the callback function will be executed.
 
 #### Create a timer
-A timer is created as an instance of the Timer class.
-It takes a timeout time and a callback function as argument.
+A timer is created as an instance of the Timer class. It takes a timeout time and a callback function as argument.
 The Timer is activated at the moment it is started.
 
 ```python
 timer = Timer(1000, self.func)  # Create a timer
+...
 timer.start()  # Start the timer. It will timeout 1000ms from this moment.
 ...
 timer.stop()  # Stop the timer.
@@ -430,10 +415,11 @@ timer.start() # Restart the timer.
 ```
 
 #### Start a timer
+A Timer is activated at the moment it is started. If needed it can at any time be restarted by calling the start function.
 
-##### Syntax 
+##### start function
 ```python
-def start(self) -> None:
+def start(self) -> None
 ```
 
 ##### Example
@@ -446,10 +432,12 @@ def func(self):
 ```
 
 #### Stop a timer
+A timer can at any time be stopped by calling the stop function.
+The stop function will inactivate the timer and preventing it from timing out.
 
-##### Syntax 
+##### stop function 
 ```python
-def stop(self) -> None:
+def stop(self) -> None
 ```
 
 ##### Example
@@ -457,7 +445,7 @@ def stop(self) -> None:
 timer = Timer(1000, self.func)  # Create a timer
 timer.start()  # Start the timer. It will timeout 1000ms from this moment.
 
-timer.stop()  # Stop the timer.
+timer.stop()  # Stop the timer. The timer is inactivated and it will not time out.
 
 def func(self):
   self.logger.debug("The timer timedout.")
