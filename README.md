@@ -120,7 +120,7 @@ git clone https://github.com/henrik7264/PY_Actors.git
 #### Testing the Python library on Linux
 
 ```bash
-cd Actors/PY_Actors
+cd PY_Actors/py_actors
 export PYTHONPATH=`pwd`
 python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main.py
@@ -177,9 +177,9 @@ There are two operations which can be applied on messages: This is to subscribe 
 An Actor subscribes to a specific message type by providing a callback function
 that is executed each time a message of that type is published.
 
-##### subscribe functiom 
+##### The subscribe function 
 ```python
-def subscribe(self, msg_type, func) -> None:
+def subscribe(self, msg_type, func) -> None
 
 # msg_type: A reference to a class/message.
 # func: A lambda or callback function. The function must take a message argument of the specified type.
@@ -194,11 +194,11 @@ def func(self, msg: MyMessage):
 ```
 
 #### Publish a Message
-The Actor publishes messages by means of the publish function. 
+An Actor publishes messages by means of the publish function. 
 
-##### publish function
+##### The publish function
 ```python
-def publish(self, msg) -> None:
+def publish(self, msg) -> None
 
 # msg: The message (instance of a class) to be published.
 ```
@@ -340,7 +340,7 @@ The scheduler interface is defined as follows:
 #### Schedule a task once
 A task can be executed once at a given time by the Scheduler. The once function will return a job id that can be used to cancel/remove the scheduled job.
 
-##### once function
+##### The once function
 ```python
 def once(self, msec: int, func) -> int:
 
@@ -361,7 +361,7 @@ def task(self):
 A job can be scheduled to repeat a task.
 The repeat function will return a job id that can be used to cancel/remove the scheduled job.
 
-##### repeat functiom 
+##### The repeat function 
 ```python
 def repeat(self, msec: int, func) -> int:
 
@@ -381,7 +381,7 @@ def task(self):
 #### Remove a scheduled job
 A scheduled job can at any time be canceled/removed.
 
-##### Syntax 
+##### The remove function 
 ```python
 def remove(self, job_id: int) -> None:
 
@@ -417,7 +417,7 @@ timer.start() # Restart the timer.
 #### Start a timer
 A Timer is activated at the moment it is started. If needed it can at any time be restarted by calling the start function.
 
-##### start function
+##### The start function
 ```python
 def start(self) -> None
 ```
@@ -435,7 +435,7 @@ def func(self):
 A timer can at any time be stopped by calling the stop function.
 The stop function will inactivate the timer and preventing it from timing out.
 
-##### stop function 
+##### The stop function 
 ```python
 def stop(self) -> None
 ```
@@ -450,7 +450,6 @@ timer.stop()  # Stop the timer. The timer is inactivated and it will not time ou
 def func(self):
   self.logger.debug("The timer timedout.")
 ```
-
 
 ### State Machines (Python)
 
