@@ -126,7 +126,7 @@ python3 example_publisher_subscriber/main.py
 python3 example_statemachine/main.py
 ```
 
-## Using the Actors library in your own project.
+## Using the Actors library in your own project
 Now to the more fun part of using the Actors library. 
 
 ### Project setup
@@ -177,7 +177,7 @@ There are two operations which can be applied on messages: This is to subscribe 
 An Actor subscribes to a specific message type by providing a callback function
 that is executed each time a message of that type is published.
 
-##### The subscribe function 
+##### The 'subscribe' function 
 ```python
 def subscribe(self, msg_type, func) -> None
 
@@ -196,7 +196,7 @@ def func(self, msg: MyMessage):
 #### Publish a Message
 An Actor publishes messages by means of the publish function. 
 
-##### The publish function
+##### The 'publish' function
 ```python
 def publish(self, msg) -> None
 
@@ -312,7 +312,7 @@ The code will produce the following log entry:
 2023-01-01 23:19:49,175 MyActor INFO: Received a MyMessage: Hello World, 1234
 ```
 
-### Scheduler (Python)
+### Scheduler
 A Scheduler can be used to execute a task (function call) at a given time.
 The task can be executed once or repeated until it is removed.
 The scheduled tasks are executed by an adaptable number of Workers.
@@ -340,7 +340,7 @@ The scheduler interface is defined as follows:
 #### Schedule a task once
 A task can be executed once at a given time by the Scheduler. The once function will return a job id that can be used to cancel/remove the scheduled job.
 
-##### The once function
+##### The 'once' function
 ```python
 def once(self, msec: int, func) -> int:
 
@@ -361,7 +361,7 @@ def task(self):
 A job can be scheduled to repeat a task.
 The repeat function will return a job id that can be used to cancel/remove the scheduled job.
 
-##### The repeat function 
+##### The 'repeat' function 
 ```python
 def repeat(self, msec: int, func) -> int:
 
@@ -381,7 +381,7 @@ def task(self):
 #### Remove a scheduled job
 A scheduled job can at any time be canceled/removed.
 
-##### The remove function 
+##### The 'remove' function 
 ```python
 def remove(self, job_id: int) -> None:
 
@@ -395,7 +395,7 @@ job_id = self.scheduler.repeat(1000, self.task)  # A new job has been scheduled.
 self.scheduler.remove(job_id)  # The job is canceled and removed.
 ```
 
-### Timers (Python)
+### Timers
 Timers are simular to schedulers, except a timer must be started before it is activated.
 A timer can at anytime be stopped or restarted if needed. The timer has a timeout and a callback function.
 The timer is activated when it is started, and when it times out the callback function will be executed.
@@ -405,27 +405,27 @@ A timer is created as an instance of the Timer class. It takes a timeout time an
 The Timer is activated at the moment it is started.
 
 ```python
-timer = Timer(1000, self.func)  # Create a timer
+self.timer = Timer(1000, self.func)  # Create a timer
 ...
-timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+self.timer.start()  # Start the timer. It will timeout 1000ms from this moment.
 ...
-timer.stop()  # Stop the timer.
+self.timer.stop()  # Stop the timer.
 ...
-timer.start() # Restart the timer.
+self.timer.start() # Restart the timer.  It will timeout 1000ms from this moment.
 ```
 
 #### Start a timer
 A Timer is activated at the moment it is started. If needed it can at any time be restarted by calling the start function.
 
-##### The start function
+##### The 'start' function
 ```python
 def start(self) -> None
 ```
 
 ##### Example
 ```python
-timer = Timer(1000, self.func)  # Create a timer
-timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+self.timer = Timer(1000, self.func)  # Create a timer
+self.timer.start()  # Start the timer. It will timeout 1000ms from this moment.
 
 def func(self):
   self.logger.debug("The timer timedout.")
@@ -435,22 +435,59 @@ def func(self):
 A timer can at any time be stopped by calling the stop function.
 The stop function will inactivate the timer and preventing it from timing out.
 
-##### The stop function 
+##### The 'stop' function 
 ```python
 def stop(self) -> None
 ```
 
 ##### Example
 ```python
-timer = Timer(1000, self.func)  # Create a timer
-timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+self.timer = Timer(1000, self.func)  # Create a timer
+self.timer.start()  # Start the timer. It will timeout 1000ms from this moment.
 
-timer.stop()  # Stop the timer. The timer is inactivated and it will not time out.
+self.timer.stop()  # Stop the timer. The timer is inactivated and it will not time out.
 
 def func(self):
   self.logger.debug("The timer timedout.")
 ```
 
-### State Machines (Python)
+### State Machines
+State machines comes in many forms and is always hard to understand.
+The state machine is in itself not that hard to understand:
+It can be in one of a number of states and it will initially be in a predefined state.
+The state machine can change from one state to another in response to an event.
+The change from one state to another is called a transition. 
+An state machine is in other words defined by list of states, an initial state,
+and the events that trigger the transitions.
 
-### Message Streams (Python)
+#### Creating a State Machine
+A state machine is created, not surprisingly, as an instance of a Statemachine:
+
+```python
+self.sm = Statemachine(
+            initial_state,
+            State(state1, ...),
+            State(state2, ...)
+            ...
+            State(stateN, ...))
+```
+
+It takes as argument an initial state and a number of states. Each state is identified by a unique state id.
+It can be a number, string, enumeration etc. I will propose to use numerations as shown in the example below.
+
+#### Example
+The following example shows the definition of a state machine of a door.
+The door can be in state DOOR_CLOSED or DOOR_OPENED. The door is initially DOOR_CLOSED.
+
+```python
+class States(Enum):
+    DOOR_OPENED = 0,
+    DOOR_CLOSED = 1
+self.sm = Statemachine(States.DOOR_CLOSED,
+               State(States.DOOR_CLOSED, ...)
+               State(States.DOOR_OPENED, ...)
+```
+
+#### 
+
+### Message Streams
