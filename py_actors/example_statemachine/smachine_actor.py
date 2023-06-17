@@ -15,7 +15,7 @@
 import logging
 from enum import Enum
 from lib_actors.actor import Actor
-from lib_actors.statemachine import Statemachine, State, MessageTrans, TimerTrans
+from lib_actors.statemachine import Statemachine, State, Message, Timer
 from example_statemachine.messages import OpenDoorMsg, CloseDoorMsg
 
 
@@ -28,11 +28,11 @@ class SMachine(Actor):
             DOOR_OPENED = 0,
             DOOR_CLOSED = 1
         self.sm = Statemachine(States.DOOR_CLOSED,
-                       State(States.DOOR_CLOSED,
-                             MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
-                       State(States.DOOR_OPENED,
-                             MessageTrans(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
-                             TimerTrans(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
+                               State(States.DOOR_CLOSED,
+                                     Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+                               State(States.DOOR_OPENED,
+                                     Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
+                                     Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 
     def open_door(self, msg: OpenDoorMsg):
         self.logger.info("Opening door in state " + str(self.sm.get_current_state()))

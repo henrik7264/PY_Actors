@@ -20,7 +20,7 @@ from threading import Thread
 from lib_actors.scheduler import Scheduler
 
 
-class TransitionType(Enum):
+class EventType(Enum):
     MESSAGE = 0
     TIMER = 1
 
@@ -43,7 +43,7 @@ class Transition:
     The transition will finally change the state of the statemachine to the specified next_state.
     """
 
-    def __init__(self, trans_type: TransitionType, action=None, next_state=None):
+    def __init__(self, event_type: EventType, action=None, next_state=None):
         """
         Each State defines a number of Transitions that allow the statemachine to change from one state to another.
         A transition is identified by a trigger, an action and a next state operation. The trigger can either be a
@@ -56,18 +56,18 @@ class Transition:
                 DOOR_CLOSED = 1
             self.sm = Statemachine(self, States.DOOR_CLOSED,
                            State(States.DOOR_CLOSED,
-                                 MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+                                 Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
                            State(States.DOOR_OPENED,
-                                 MessageTrans(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
-                                 TimerTrans(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
+                                 Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
+                                 Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 
-        :param trans_type: The type of the transition, either a Message or Timer.
+        :param event_type: The type of the transition, either a Message or Timer.
         :param action: A callback function that is executed each time a transition is triggered.
         :param next_state: The next state of the statemachine. Set as part of a transition is triggered.
         """
 
         self.statemachine = None
-        self.trans_type = trans_type
+        self.event_type = event_type
         self.action = action
         self.next_state = next_state
 
@@ -83,28 +83,28 @@ class Transition:
         self.statemachine = statemachine
 
 
-class MessageTrans(Transition):
+class Message(Transition):
     """
-    A MessageTrans is a transition that is triggered by a message published by an Actor.
+    A Message is a transition that is triggered by a message published by an Actor.
     """
 
     def __init__(self, msg_type, action=None, next_state=None):
         """
-        A MessageTrans is a transition that is triggered by a message published by an Actor.
+        A Message is a transition that is triggered by a message published by an Actor.
 
-        The MessageTrans must specify the exact message type that triggers the transition.
+        The Message must specify the exact message type that triggers the transition.
         It must also specify an action which is a callback function that called each time the transition is triggered.
         Finally, it must specify a next state which the statemachine will be in the transition is complete.
 
         Example:
-            MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+            Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
 
         :param msg_type: The specific message type that will trigger the transition.
         :param action: A callback function that is executed when the transition is triggered.
         :param next_state: The next state of the statemachine when then transition is complete.
         """
 
-        super().__init__(trans_type=TransitionType.MESSAGE, action=action, next_state=next_state)
+        super().__init__(event_type=EventType.MESSAGE, action=action, next_state=next_state)
         self.msg_type = msg_type
 
     def update(self, msg):
@@ -122,28 +122,28 @@ class MessageTrans(Transition):
             self.statemachine.set_current_state(self.next_state)
 
 
-class TimerTrans(Transition):
+class Timer(Transition):
     """
-    A TimerTrans is a transition that is triggered by a timer when it times out.
+    A Timer is a transition that is triggered by a timer when it times out.
     """
 
     def __init__(self, timeout: int, action=None, next_state=None):
         """
-        A TimerTrans is a transition that is triggered by a timer when it times out.
+        A Timer is a transition that is triggered by a timer when it times out.
 
-        The TimerTrans must specify the timeout of the timer.
+        The Timer must specify the timeout of the timer.
         It must also specify an action which is a callback function that called when the timer times out.
         Finally, it must specify a next state which the statemachine will be in the transition is complete.
 
         Example:
-            TimerTrans(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)),
+            Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)),
 
         :param timeout: The timeout in milliseconds. When the timer times out the transition will be triggered.
         :param action: A callback function that is executed when the transition is triggered.
         :param next_state: The next state of the statemachine when then transition is complete.
         """
 
-        super().__init__(trans_type=TransitionType.TIMER, action=action, next_state=next_state)
+        super().__init__(event_type=EventType.TIMER, action=action, next_state=next_state)
         self.timeout = timeout
 
     def update(self):
@@ -186,10 +186,10 @@ class State:
                 DOOR_CLOSED = 1
             self.sm = Statemachine(self, States.DOOR_CLOSED,
                            State(States.DOOR_CLOSED,
-                                 MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+                                 Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
                            State(States.DOOR_OPENED,
-                                 MessageTrans(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
-                                 TimerTrans(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
+                                 Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
+                                 Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 
         :param state_name: The name of a State, typically an enum, i.e. integer.
         :param transitions: A number of transitions that when triggered will change the state of the statemachine.
@@ -200,12 +200,12 @@ class State:
         self.message_dict = {}  # {MsgType1: Trans1, MsgType2: Trans2, ...}
         self.timers_list = []  # [Trans3, Trans4 ...]
         for trans in self.transitions:
-            if trans.trans_type == TransitionType.MESSAGE:
-                message_trans = cast(MessageTrans, trans)
-                self.message_dict[message_trans.msg_type] = message_trans
-            elif trans.trans_type == TransitionType.TIMER:
-                timer_trans = cast(TimerTrans, trans)
-                self.timers_list.append(timer_trans)
+            if trans.event_type == EventType.MESSAGE:
+                message = cast(Message, trans)
+                self.message_dict[message.msg_type] = message
+            elif trans.event_type == EventType.TIMER:
+                timer = cast(Timer, trans)
+                self.timers_list.append(timer)
 
     def set_statemachine(self, statemachine):
         """
@@ -266,10 +266,10 @@ class Statemachine:
                 DOOR_CLOSED = 1
             self.sm = Statemachine(States.DOOR_CLOSED,
                            State(States.DOOR_CLOSED,
-                                 MessageTrans(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+                                 Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
                            State(States.DOOR_OPENED,
-                                 MessageTrans(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
-                                 TimerTrans(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
+                                 Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
+                                 Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 
         :param initial_state: The initial state of the Statemachine
         :param states: A number of states of the statemachine.
@@ -319,8 +319,8 @@ class Statemachine:
         state = self.state_dict.get(self.current_state)
         if state is not None:
             for trans in state.timers_list:
-                timer_trans = cast(TimerTrans, trans)
-                self.scheduled_jobs.append(self.scheduler.once(timer_trans.timeout, timer_trans.update))
+                timer = cast(Timer, trans)
+                self.scheduled_jobs.append(self.scheduler.once(timer.timeout, timer.update))
 
     def update(self, msg):
         """
@@ -421,11 +421,11 @@ class Statemachines(Thread):
         if statemachine is not None:
             for state in statemachine.states:
                 for trans in state.transitions:
-                    if trans.trans_type == TransitionType.MESSAGE:
-                        message_trans = cast(MessageTrans, trans)
-                        statemachine_list = self.statemachines_dict.get(message_trans.msg_type)
+                    if trans.event_type == EventType.MESSAGE:
+                        message = cast(Message, trans)
+                        statemachine_list = self.statemachines_dict.get(message.msg_type)
                         if statemachine_list is None:
                             statemachine_list = [statemachine]
                         elif statemachine not in statemachine_list:
                             statemachine_list.append(statemachine)
-                        self.statemachines_dict[message_trans.msg_type] = statemachine_list
+                        self.statemachines_dict[message.msg_type] = statemachine_list

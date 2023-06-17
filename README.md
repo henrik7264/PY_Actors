@@ -488,8 +488,8 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                State(States.DOOR_OPENED, ...)
 ```
 
-#### Creting a State
-A State is defefined by it's id and a number of transitions that each is triggered by an event.
+#### Creating a State
+A State is defined by its id and a number of transitions that each is triggered by an event.
 
 ```python
 class States(Enum):
@@ -502,7 +502,33 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                       Message(CloseDoorMsg, ...),
                       Timer(1000, ...)))
 ```
+
 A state id is identified by a unique number, string, enumeration etc. Use enumerations as shown above.
 This is a nice way to define state ids.
+
+Two types of transitions can at the moment be used. That is the Message transition 
+which is triggered by a Message that is published by an Actor, and the Timer transition
+that is triggered by a timer timeout.
+
+Observe that there are some name clashes here. The Timer class with we introduced in the previous chapter
+collides with the Timer class of the Statemachine. They are two distinct class with almost the same functionalitym,
+but one is a Transition to be used 
+
+#### Creating a Transition
+
+To get the full picture of the functionality of the Statemachine we have to understand transitions. 
+A transition is triggered by an event.
+
+```python
+class States(Enum):
+    DOOR_OPENED = 0,
+    DOOR_CLOSED = 1
+self.sm = Statemachine(States.DOOR_CLOSED,
+                       State(States.DOOR_CLOSED,
+                             Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+                       State(States.DOOR_OPENED,
+                             Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
+                             Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
+```
 
 ### Message Streams
