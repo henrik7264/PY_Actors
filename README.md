@@ -464,8 +464,7 @@ and the events that trigger the transitions.
 A state machine is created, not surprisingly, as an instance of a Statemachine:
 
 ```python
-self.sm = Statemachine(
-            initial_state,
+self.sm = Statemachine(initial_state,
             State(state1, ...),
             State(state2, ...)
             ...
@@ -473,11 +472,12 @@ self.sm = Statemachine(
 ```
 
 It takes as argument an initial state and a number of states. Each state is identified by a unique state id.
-It can be a number, string, enumeration etc. I will propose to use numerations as shown in the example below.
+It can be a number, string, enumeration etc. Use enumerations as shown in the example below.
+This is a nice way to define state ids.
 
 #### Example
 The following example shows the definition of a state machine of a door.
-The door can be in state DOOR_CLOSED or DOOR_OPENED. The door is initially DOOR_CLOSED.
+The door can be in state DOOR_CLOSED or DOOR_OPENED. The door is initially in state DOOR_CLOSED.
 
 ```python
 class States(Enum):
@@ -488,6 +488,21 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                State(States.DOOR_OPENED, ...)
 ```
 
-#### 
+#### Creting a State
+A State is defefined by it's id and a number of transitions that each is triggered by an event.
+
+```python
+class States(Enum):
+    DOOR_OPENED = 0,
+    DOOR_CLOSED = 1
+self.sm = Statemachine(States.DOOR_CLOSED,
+                State(States.DOOR_CLOSED,
+                      Message(OpenDoorMsg, ...)),
+                State(States.DOOR_OPENED,
+                      Message(CloseDoorMsg, ...),
+                      Timer(1000, ...)))
+```
+A state id is identified by a unique number, string, enumeration etc. Use enumerations as shown above.
+This is a nice way to define state ids.
 
 ### Message Streams
