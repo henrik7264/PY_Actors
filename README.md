@@ -484,12 +484,36 @@ class States(Enum):
     DOOR_OPENED = 0,
     DOOR_CLOSED = 1
 self.sm = Statemachine(States.DOOR_CLOSED,
-               State(States.DOOR_CLOSED, ...)
-               State(States.DOOR_OPENED, ...)
+               State(States.DOOR_CLOSED, ...),
+               State(States.DOOR_OPENED, ...))
 ```
 
 #### Creating a State
 A State is defined by its id and a number of transitions that each is triggered by an event.
+
+```python
+class States(Enum):
+    DOOR_OPENED = 0,
+    DOOR_CLOSED = 1
+self.sm = Statemachine(States.DOOR_CLOSED,
+                State(States.DOOR_CLOSED,
+                      Transition(...),
+                      ...
+                      Transition(...)),
+                State(States.DOOR_OPENED,
+                      Transition(...),
+                      ...
+                      Transition(...)))
+```
+
+A state id is identified by a unique number, string, enumeration etc. Use enumerations as shown above.
+This is a nice way to define state ids.
+
+Two types of transitions can be used. That is the Message transition 
+which is triggered by a Message that is published by an Actor, and the Timer transition
+that is triggered by a timer timeout.
+
+#### Example
 
 ```python
 class States(Enum):
@@ -503,21 +527,15 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                       Timer(1000, ...)))
 ```
 
-A state id is identified by a unique number, string, enumeration etc. Use enumerations as shown above.
-This is a nice way to define state ids.
-
-Two types of transitions can at the moment be used. That is the Message transition 
-which is triggered by a Message that is published by an Actor, and the Timer transition
-that is triggered by a timer timeout.
-
 Observe that there are some name clashes here. The Timer class with we introduced in the previous chapter
-collides with the Timer class of the Statemachine. They are two distinct class with almost the same functionalitym,
-but one is a Transition to be used 
+collides with the Timer class of the Statemachine. They are two distinct class with almost the same functionality,
+but one is a Transition to be used together with a Statemachine. The other is just a normal timer object.
 
 #### Creating a Transition
 
-To get the full picture of the functionality of the Statemachine we have to understand transitions. 
-A transition is triggered by an event.
+To get the full picture of the state machine's capabilities we have to understand transitions. 
+A transition is triggered by an event. When it is triggered it will perform an action (optional),
+and finally it will change to a new/next state (optional).
 
 ```python
 class States(Enum):
@@ -530,5 +548,26 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                              Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
                              Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 ```
+
+Two types of transitions exists. That is the Message transition 
+which is triggered by a Message that is published by an Actor, and the Timer transition
+that is triggered by a timer timeout.
+
+The action part is simply a function or lambda expression that is executed.
+When the operation is complete the transition will set the next state.
+
+#### Observations related to Statemachines
+
+The Statemachine is tricky construction, and it shall be used with care:
+
+1. A Statemachine is tightly coupled to an Actor. In fact, the Statemachine can not be used outside the scope of an Actor.
+2. A transition is not a transaction or an atomic operation. It works as follows:
+   1. A message is published by an Actor.
+   2. The Statemachine will check if it has a transition that is triggered by the message event.
+   3. If this is the case a Worker thread will handle the transaction.
+   4. The Worker thread will first execute the action and then set the new/next state of the state machine.
+   So we back to the old problem. The action operation can take long time
+   and everything can happen in this period.
+3. The Timer class collides with the transition Timer class of the Statemachine.
 
 ### Message Streams
