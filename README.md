@@ -5,7 +5,6 @@ Welcome to Actors - a Python library for creating Reactive Systems based on the 
 
 ## Status
 The library is currently a work in progress and may change without any notice. 
-An early version of the Python library is available. 
 It's a proof of concept version that provides the basic Actors functionality and most of the features discussed below.
 The library has been tested informally on a
 
@@ -26,7 +25,7 @@ My inspiration for this project originates from the following sources:
 * Reactive systems (https://www.reactivemanifesto.org)
 
 Although there are several references to ROS, the library has as such nothing to do with programming robots.
-It is a general purpose library/framework for creating reactive systems.
+It is a general purpose library/framework for creating reactive systems using Actors.
 
 ## Approach
 I have always found the following items central for producing high quality software
@@ -42,8 +41,10 @@ I have always found the following items central for producing high quality softw
 * Reusability<br>Reusability of code is the use of existing software, or software knowledge,
   to build new software (ref. https://en.wikipedia.org/wiki/Code_reuse). This is of course the fundamental idea with library.
   I just hope the library has the quality that is needed to be used over and over again in many projects.
+  The big question is however if the produced code using the library will result in more reusable code?
+  This is my hope, but it will have to be seen.
 * Keep it simple<br>Keep it simple! Well, well, well - I could talk hours about this subject,
-  but this is not the purpose of this section. I think you know what I am talking about, 
+  but this is not the purpose of this section. I think you know what I am talking about,
   especially if you have tried to take over the maintenance of some code your "dear" colleague produced just before he left the company. 
   Even code that I produced myself is hard to read and understand after having been away from it for say ½ a year.
   I have put a lot of work in making this code easy to read and understand,
