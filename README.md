@@ -529,7 +529,7 @@ self.sm = Statemachine(States.DOOR_CLOSED,
 ```
 
 Observe that there are some name clashes here. The Timer class with we introduced in the previous chapter
-collides with the Timer class of the Statemachine. They are two distinct class with almost the same functionality,
+collides with the Transition Timer class. They are two distinct class with almost the same functionality,
 but one is a Transition to be used together with a Statemachine. The other is just a normal timer object.
 
 #### Creating a Transition
@@ -571,8 +571,11 @@ The state machine is tricky construction, but care has been taken to make it sim
    
    If a timer timeout during the execution of a transition it will be dropped. 
    An incoming Message event will be postponed if a transaction is being executed.
-3. The Timer class collides with the transition Timer class of the Statemachine. If you need to use both in the same Actor care must be taken.
-4. The state machine can slow down due to constraints with execution of transitions. 
-5. The implementation of the state machine is complex and needs to be refactored.
+3. An Actor can define more state machines. The state machines are updated concurrently
+   and there is no way to determine if one state machine is updated before the other.
+4. The Timer class name collides with the transition Timer class.
+   If you need to use both in the same Actor care must be taken.
+5. The state machine can slow down due to constraints with execution of transitions. 
+6. The implementation of the state machine is complex and needs to be refactored.
 
 ### Message Streams
