@@ -556,18 +556,22 @@ that is triggered by a timer timeout.
 The action part is simply a function or lambda expression that is executed.
 When the operation is complete the transition will set the next state.
 
-#### Observations related to Statemachines
+#### Observations related to State Machines
 
-The Statemachine is tricky construction, and it shall be used with care:
+The state machine is tricky construction, but care has been taken to make it simple and safe to use:
 
-1. A Statemachine is tightly coupled to an Actor. In fact, the Statemachine can not be used outside the scope of an Actor.
-2. A transition is not a transaction or an atomic operation. It works as follows:
+1. A state machine is tightly coupled to an Actor. In fact, the state machine can not be used outside the scope of an Actor.
+2. A transition is an atomic operation, but with some restrictions. It works as follows:
    1. A message is published by an Actor.
-   2. The Statemachine will check if it has a transition that is triggered by the message event.
-   3. If this is the case a Worker thread will handle the transaction.
-   4. The Worker thread will first execute the action and then set the new/next state of the state machine.
-   So we back to the old problem. The action operation can take long time
-   and everything can happen in this period.
-3. The Timer class collides with the transition Timer class of the Statemachine.
+   2. The state machine will check if it has a transition that is triggered by the message event.
+   3. If this is the case, the state machine will be locked until the transition has been executed.
+   4. A dedicated Worker thread will first execute the action and then set the next state of the state machine.
+   5. The state machine is unlocked and new events can be handled.
+   
+   If a timer timeout during the execution of a transition it will be dropped. 
+   An incoming Message event will be postponed if a transaction is being executed.
+3. The Timer class collides with the transition Timer class of the Statemachine. If you need to use both in the same Actor care must be taken.
+4. The state machine can slow down due to constraints with execution of transitions. 
+5. The implementation of the state machine is complex and needs to be refactored.
 
 ### Message Streams

@@ -45,15 +45,15 @@ class Timer:
         self.msec = msec
         self.func = func
         self.cb_func = func
-        self.lock = None
+        self.actor_lock = None
         actor = inspect.currentframe().f_back.f_locals["self"]  # Dirty trick to get the Actor instance.
         if hasattr(actor, "lock"):
-            self.lock = actor.lock  # Lock from Actor to synchronize callback functions
+            self.actor_lock = actor.lock  # Lock from Actor to synchronize callback functions
             self.cb_func = self._locked_func
         self.job_id = None
 
     def _locked_func(self):
-        with self.lock:
+        with self.actor_lock:
             self.func()
 
     def stop(self):

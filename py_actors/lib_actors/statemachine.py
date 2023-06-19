@@ -16,11 +16,12 @@ import inspect
 from typing import cast
 from enum import Enum
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
+from lib_actors.executor import Executor
 from lib_actors.scheduler import Scheduler
 
 
-class EventType(Enum):
+class TransitionType(Enum):
     MESSAGE = 0
     TIMER = 1
 
@@ -43,7 +44,7 @@ class Transition:
     The transition will finally change the state of the statemachine to the specified next_state.
     """
 
-    def __init__(self, event_type: EventType, action=None, next_state=None):
+    def __init__(self, transition_type: TransitionType, action=None, next_state=None):
         """
         Each State defines a number of Transitions that allow the statemachine to change from one state to another.
         A transition is identified by a trigger, an action and a next state operation. The trigger can either be a
@@ -61,13 +62,13 @@ class Transition:
                                  Message(CloseDoorMsg, action=self.close_door, next_state=States.DOOR_CLOSED),
                                  Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 
-        :param event_type: The type of the transition, either a Message or Timer.
+        :param transition_type: The type of the transition, either a Message or Timer.
         :param action: A callback function that is executed each time a transition is triggered.
         :param next_state: The next state of the statemachine. Set as part of a transition is triggered.
         """
 
         self.statemachine = None
-        self.event_type = event_type
+        self.transition_type = transition_type
         self.action = action
         self.next_state = next_state
 
@@ -104,21 +105,21 @@ class Message(Transition):
         :param next_state: The next state of the statemachine when then transition is complete.
         """
 
-        super().__init__(event_type=EventType.MESSAGE, action=action, next_state=next_state)
+        super().__init__(transition_type=TransitionType.MESSAGE, action=action, next_state=next_state)
         self.msg_type = msg_type
 
     def update(self, msg):
         """
-        Internal function - do not use.
-
+        Internal function - do not use!
         Actual execution of the action callback function of the transition.
 
         :param msg: A message published by an Actor.
         """
 
-        with self.statemachine.lock:
-            if self.action is not None:
+        if self.action is not None:
+            with self.statemachine.actor_lock:
                 self.action(msg)
+        if self.next_state is not None:
             self.statemachine.set_current_state(self.next_state)
 
 
@@ -143,20 +144,22 @@ class Timer(Transition):
         :param next_state: The next state of the statemachine when then transition is complete.
         """
 
-        super().__init__(event_type=EventType.TIMER, action=action, next_state=next_state)
+        super().__init__(transition_type=TransitionType.TIMER, action=action, next_state=next_state)
         self.timeout = timeout
 
     def update(self):
         """
-        Internal function - do not use.
-
+        Internal function - do not use!
         Actual execution of the action callback function of the transition.
         """
 
-        with self.statemachine.lock:
-            if self.action is not None:
-                self.action()
-            self.statemachine.set_current_state(self.next_state)
+        if not self.statemachine.sm_lock.locked():  # if a transition is already being executed, drop the timeout.
+            with self.statemachine.sm_lock:  # lock the state machine while executing a transition.
+                if self.action is not None:
+                    with self.statemachine.actor_lock:
+                        self.action()
+                if self.next_state is not None:
+                    self.statemachine.set_current_state(self.next_state)
 
 
 class State:
@@ -168,7 +171,7 @@ class State:
                         Transition(...),
                         Transition(...)),
                     State(State_n,
-                        Transition(...),
+                            Transition(...),
                         Transition(...)))
 
     Each State defines a number of Transitions that allow the statemachine to change from one state to another.
@@ -200,10 +203,10 @@ class State:
         self.message_dict = {}  # {MsgType1: Trans1, MsgType2: Trans2, ...}
         self.timers_list = []  # [Trans3, Trans4 ...]
         for trans in self.transitions:
-            if trans.event_type == EventType.MESSAGE:
+            if trans.transition_type == TransitionType.MESSAGE:
                 message = cast(Message, trans)
                 self.message_dict[message.msg_type] = message
-            elif trans.event_type == EventType.TIMER:
+            elif trans.transition_type == TransitionType.TIMER:
                 timer = cast(Timer, trans)
                 self.timers_list.append(timer)
 
@@ -277,7 +280,8 @@ class Statemachine:
 
         actor = inspect.currentframe().f_back.f_locals["self"]  # Dirty trick to get the Actor instance.
         assert(hasattr(actor, "lock"))
-        self.lock = actor.lock  # Lock from Actor to synchronize callback functions
+        self.actor_lock = actor.lock  # Lock from Actor to synchronize callback functions.
+        self.sm_lock = Lock() # Lock to ensure that only transition is executing at a time.
         self.current_state = None  # Current state of the Statemachine, typically an enum, i.e. integer
         self.states = states  # The states of a statemachine
         self.state_dict = {}  # { name1: State1, name2: State2, ...}, name is typically an enum, i.e. integer
@@ -287,7 +291,7 @@ class Statemachine:
             state.set_statemachine(self)
             self.state_dict[state.state_name] = state
         self.set_current_state(initial_state)
-        Statemachines.get_instance().register(self)
+        SMDispatcher.get_instance().register(self)
 
     def get_current_state(self):
         """
@@ -326,77 +330,61 @@ class Statemachine:
         """
         Internal function - do not use!
 
-        The update function works as follows: A Worker of the Statemachines class calls update
+        The update function works as follows: A Worker of the SMDispatcher class calls update
         with a message that has been published by an Actor. Update will pass this message
         to the current State by calling its update function.
 
         :param msg: A message published by an Actor.
         """
 
-        state = self.state_dict.get(self.current_state)
-        if state is not None:
-            state.update(msg)
+        with self.sm_lock:  # ensure that there is only one transition that is executed at a time.
+            state = self.state_dict.get(self.current_state)
+            if state is not None:
+                state.update(msg)
 
 
-class Statemachines(Thread):
+class SMDispatcher(Thread):
     """
-    The Statemachines class keeps track of all created statemachines.
+    The SMDispatcher class keeps track of all created state machines.
 
     Each statemachine must register itself calling the register function.
     Part of registration is to walk through the statemachine and associate
     each transition that is triggered by message to the statemachine. This
-    will allow for easy look up of statemachines that should be updated
+    will allow for easy look up of state machines that should be updated
     when a message is published.
 
-    The Statemachines class makes use of a number of Workers to execute the actions of a transition.
+    The SMDispatcher class makes use of a number of Workers to execute the actions of a transition.
     The number of workers will adapt to the load of the messages. When the size of the worker queue
     exceeds a given number a new worker will be created.
     """
 
-    __instance__ = None  # A Statemachines class is a singleton.
-
-    class Worker(Thread):
-        """
-        The Worker class takes care of executing the (update function, statemachine) pair that is pushed to its queue.
-        """
-
-        def __init__(self, worker_queue: Queue):
-            super().__init__(daemon=True)
-            self.worker_queue = worker_queue  # Shared queue with statemachines
-            self.start()
-
-        def run(self):
-            while True:
-                update, sm = self.worker_queue.get()
-                update(sm)  # Calls sm.update(msg)
+    __instance__ = None  # A SMDispatcher class is a singleton.
 
     def __init__(self):
         """
-        Do not create instances of this class! Statemachines is a singleton.
+        Do not create instances of this class! SMDispatcher is a singleton.
         """
 
         super().__init__(daemon=True)
         self.statemachines_dict = {}  # {MsgType1: [sm1, sm2], MsgType2: [sm33], ...}
-        self.worker_queue = Queue()  # Queue of statemachines to be updated.
-        self.worker_queue_max_size = 2  # When the queue exceeds this size a new Worker will be created.
-        self.workers = [Statemachines.Worker(self.worker_queue)]  # list of workers
         self.message_queue = Queue()  # New published messages by an Actor shall be pushed to this queue.
+        self.executor = Executor.get_instance()  # Executes the functions.
         self.start()
 
     @staticmethod
     def get_instance():
         """
-        The Statemachines class is a singleton and should only be accessed through this function.
+        The SMDispatcher class is a singleton and should only be accessed through this function.
 
         Example:
-            statemachines = Statemachines.get_instance()
+            sm_dispatcher = SMDispatcher.get_instance()
 
-        :return: an instance of the Statemachines class.
+        :return: an instance of the SMDispatcher class.
         """
 
-        if Statemachines.__instance__ is None:
-            Statemachines.__instance__ = Statemachines()
-        return Statemachines.__instance__
+        if SMDispatcher.__instance__ is None:
+            SMDispatcher.__instance__ = SMDispatcher()
+        return SMDispatcher.__instance__
 
     def run(self):
         while True:
@@ -405,23 +393,20 @@ class Statemachines(Thread):
                 statemachine_list = self.statemachines_dict.get(type(msg))
                 if statemachine_list is not None:
                     for statemachine in statemachine_list:
-                        self.worker_queue.put((lambda sm: sm.update(msg), statemachine))
-                        if self.worker_queue.qsize() > self.worker_queue_max_size:
-                            self.workers.append(Statemachines.Worker(self.worker_queue))
-                            self.worker_queue_max_size *= 2
+                        self.executor.exec(lambda sm: sm.update(msg), statemachine)
 
     def register(self, statemachine: Statemachine):
         """
         Registers a statemachine.
 
         Example:
-            Statemachines.get_instance().register(statemachine)
+            SMDispatcher.get_instance().register(statemachine)
         """
 
         if statemachine is not None:
             for state in statemachine.states:
                 for trans in state.transitions:
-                    if trans.event_type == EventType.MESSAGE:
+                    if trans.transition_type == TransitionType.MESSAGE:
                         message = cast(Message, trans)
                         statemachine_list = self.statemachines_dict.get(message.msg_type)
                         if statemachine_list is None:

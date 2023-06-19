@@ -17,7 +17,7 @@ from reactivex import create, Observable
 from threading import Lock
 from lib_actors.scheduler import Scheduler
 from lib_actors.dispatcher import Dispatcher
-from lib_actors.statemachine import Statemachines
+from lib_actors.statemachine import SMDispatcher
 
 logging.basicConfig(level=logging.NOTSET,
                     format='%(asctime)s %(name)s %(levelname)s: %(message)s',
@@ -147,7 +147,7 @@ class Actor:
 
             self.lock = lock
             self.msg_dispatcher = Dispatcher.get_instance()
-            self.sm_dispatcher = Statemachines.get_instance()
+            self.sm_dispatcher = SMDispatcher.get_instance()
 
         def subscribe(self, msg_type, func) -> None:
             """
