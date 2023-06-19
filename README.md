@@ -549,12 +549,12 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                              Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 ```
 
-Two types of transitions exists. That is the Message transition 
-which is triggered by a Message that is published by an Actor, and the Timer transition
-that is triggered by a timer timeout.
+Two types of transitions exists. That is the Message transition which is triggered by a Message event
+published by an Actor, and the Timer transition that is triggered by a timer timeout.
 
-The action part is simply a function or lambda expression that is executed.
-When the operation is complete the transition will set the next state.
+The action part is simply a function or lambda expression that is executed as part handling the transition.
+When the operation is complete the transition will set the new/next state of the state machine.
+Observe that both the action and next_state are optional. 
 
 #### Observations related to State Machines
 
