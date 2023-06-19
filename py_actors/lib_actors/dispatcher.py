@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from queue import Queue
-from threading import Thread, Lock
+from threading import Lock
+from lib_actors.executor import Executor
 
 
 class Dispatcher:
@@ -34,21 +34,6 @@ class Dispatcher:
 
     __instance__ = None  # A Dispatcher is a singleton.
 
-    class Worker(Thread):
-        """
-        The Worker class takes care of executing the (func, message) pair that is pushed to its queue.
-        """
-
-        def __init__(self, worker_queue: Queue):
-            super().__init__(daemon=True)
-            self.worker_queue = worker_queue  # Shared queue with Dispatcher
-            self.start()
-
-        def run(self):
-            while True:
-                func, msg = self.worker_queue.get()
-                func(msg)
-
     def __init__(self):
         """
         Do not create instances of this class! Dispatcher is a singleton.
@@ -56,9 +41,7 @@ class Dispatcher:
 
         self.lock = Lock()  # To ensure that subscribe and publish function are executed in a thread safe manner
         self.functions_dict = {}  # List of functions/callbacks for each message type {Type1: [cb1, cb2], Type2: [cb3]}
-        self.worker_queue = Queue() # queue of functions and messages to be executed.
-        self.worker_queue_max_size = 2  # When the queue exceeds this size a new Worker will be created
-        self.workers = [Dispatcher.Worker(self.worker_queue)]  # List of workers
+        self.executor = Executor.get_instance()  # Executes the functions.
 
     @staticmethod
     def get_instance():
@@ -113,7 +96,4 @@ class Dispatcher:
             function_list = self.functions_dict.get(type(msg))
             if function_list is not None:
                 for func in function_list:
-                    self.worker_queue.put((func, msg))
-                    if self.worker_queue.qsize() > self.worker_queue_max_size:
-                        self.workers.append(Dispatcher.Worker(self.worker_queue))
-                        self.worker_queue_max_size *= 2
+                    self.executor.exec(func, msg)

@@ -14,8 +14,8 @@
 
 import sys
 from time import time
-from queue import Queue
 from threading import Thread, Event, Lock
+from lib_actors.executor import Executor
 
 
 class Scheduler(Thread):
@@ -35,21 +35,6 @@ class Scheduler(Thread):
 
     __instance__ = None  # A Scheduler is a singleton.
 
-    class Worker(Thread):
-        """
-        The Worker class takes care of executing the function that is pushed to its queue.
-        """
-
-        def __init__(self, worker_queue: Queue):
-            super().__init__(daemon=True)
-            self.worker_queue = worker_queue  # Shared queue with Scheduler
-            self.start()
-
-        def run(self):
-            while True:
-                func = self.worker_queue.get()
-                func()
-
     def __init__(self):
         """
         Do not create instances of this class! Scheduler is a singleton.
@@ -58,9 +43,7 @@ class Scheduler(Thread):
         super().__init__(daemon=True)
         self.job_id = 0  # unique id that is returned each time a job is scheduled.
         self.jobs = {}  # { job_id1: (timeout1, msec1, f1, repeat1), job_id2: (timeout2, msec2, f2, repeat2), ...}
-        self.worker_queue = Queue()  # Queue of jobs/functions to be executed.
-        self.worker_queue_max_size = 2  # When the queue exceeds this size a new Worker will be created.
-        self.workers = [Scheduler.Worker(self.worker_queue)]  # List of workers.
+        self.executor = Executor.get_instance()  # Execute functions
         self.event = Event()  # Control if the wait should be blocked or not
         self.lock = Lock()  # Synchronize critical regions/data.
         self.start()
@@ -100,10 +83,7 @@ class Scheduler(Thread):
             with self.lock:
                 for job_id, (job_timeout, job_msec, job_func, job_repeat) in self.jobs.items():
                     if job_repeat > 0 and job_timeout <= current_time:
-                        self.worker_queue.put(job_func)
-                        if self.worker_queue.qsize() > self.worker_queue_max_size:
-                            self.workers.append(Scheduler.Worker(self.worker_queue))
-                            self.worker_queue_max_size *= 2
+                        self.executor.exec(job_func)
                         self.jobs[job_id] = (job_timeout+float(job_msec)/1000.0, job_msec, job_func, job_repeat-1)
 
     def once(self, msec: int, func) -> int:
