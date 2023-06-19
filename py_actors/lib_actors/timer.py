@@ -18,7 +18,7 @@ from lib_actors.scheduler import Scheduler
 
 class Timer:
     """
-<    The Timer class is a simple implementation of timer function.
+    The Timer class is a simple implementation of timer function.
     A Timer can be stated and stopped at any time.
     When the timer times out its callback function is called.
 
@@ -41,7 +41,6 @@ class Timer:
         :param msec: timeout in milliseconds.
         :param func: call back function to be executed when the timer times out.
         """
-
         self.msec = msec
         self.func = func
         self.cb_func = func
@@ -63,7 +62,6 @@ class Timer:
         Example:
             timer.stop()
         """
-
         if self.job_id is not None:
             Scheduler.get_instance().remove(self.job_id)
             self.job_id = None
@@ -75,6 +73,5 @@ class Timer:
         Example:f_back
             timer.start()
         """
-
         self.stop()
         self.job_id = Scheduler.get_instance().once(self.msec, self.cb_func)

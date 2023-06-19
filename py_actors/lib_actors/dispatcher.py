@@ -38,7 +38,6 @@ class Dispatcher:
         """
         Do not create instances of this class! Dispatcher is a singleton.
         """
-
         self.lock = Lock()  # To ensure that subscribe and publish function are executed in a thread safe manner
         self.functions_dict = {}  # List of functions/callbacks for each message type {Type1: [cb1, cb2], Type2: [cb3]}
         self.executor = Executor.get_instance()  # Executes the functions.
@@ -53,7 +52,6 @@ class Dispatcher:
 
         :return: an instance of the Dispatcher class.
         """
-
         if Dispatcher.__instance__ is None:
             Dispatcher.__instance__ = Dispatcher()
         return Dispatcher.__instance__
@@ -71,7 +69,6 @@ class Dispatcher:
         :param msg_type: A reference to a class/message.
         :param func: A lambda or callback function. The function must take a message argument of the specified type.
         """
-
         with self.lock:
             func_list = self.functions_dict.get(msg_type)
             if func_list is None:
@@ -91,7 +88,6 @@ class Dispatcher:
 
         :param msg: The message (instance of a class) to be published.
         """
-
         with self.lock:
             function_list = self.functions_dict.get(type(msg))
             if function_list is not None:

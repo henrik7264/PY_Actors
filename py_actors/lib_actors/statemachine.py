@@ -15,8 +15,7 @@
 import inspect
 from typing import cast
 from enum import Enum
-from queue import Queue
-from threading import Thread, Lock
+from threading import Lock
 from lib_actors.executor import Executor
 from lib_actors.scheduler import Scheduler
 
@@ -277,7 +276,6 @@ class Statemachine:
         :param initial_state: The initial state of the Statemachine
         :param states: A number of states of the statemachine.
         """
-
         actor = inspect.currentframe().f_back.f_locals["self"]  # Dirty trick to get the Actor instance.
         assert(hasattr(actor, "lock"))
         self.actor_lock = actor.lock  # Lock from Actor to synchronize callback functions.
@@ -302,7 +300,6 @@ class Statemachine:
 
         :return: Current state of the statemachine. Typically, an enum or integer.
         """
-
         return self.current_state
 
     def set_current_state(self, new_state):
@@ -314,7 +311,6 @@ class Statemachine:
 
         :param new_state: The new/current state of the statemachine.
         """
-
         for job_id in self.scheduled_jobs:
             self.scheduler.remove(job_id)
         self.scheduled_jobs = []
@@ -336,14 +332,13 @@ class Statemachine:
 
         :param msg: A message published by an Actor.
         """
-
         with self.sm_lock:  # ensure that there is only one transition that is executed at a time.
             state = self.state_dict.get(self.current_state)
             if state is not None:
                 state.update(msg)
 
 
-class SMDispatcher(Thread):
+class SMDispatcher:
     """
     The SMDispatcher class keeps track of all created state machines.
 
@@ -352,10 +347,6 @@ class SMDispatcher(Thread):
     each transition that is triggered by message to the statemachine. This
     will allow for easy look up of state machines that should be updated
     when a message is published.
-
-    The SMDispatcher class makes use of a number of Workers to execute the actions of a transition.
-    The number of workers will adapt to the load of the messages. When the size of the worker queue
-    exceeds a given number a new worker will be created.
     """
 
     __instance__ = None  # A SMDispatcher class is a singleton.
@@ -364,12 +355,9 @@ class SMDispatcher(Thread):
         """
         Do not create instances of this class! SMDispatcher is a singleton.
         """
-
-        super().__init__(daemon=True)
         self.statemachines_dict = {}  # {MsgType1: [sm1, sm2], MsgType2: [sm33], ...}
-        self.message_queue = Queue()  # New published messages by an Actor shall be pushed to this queue.
+        self.lock = Lock()  # To ensure that register and publish function are executed in a thread safe manner
         self.executor = Executor.get_instance()  # Executes the functions.
-        self.start()
 
     @staticmethod
     def get_instance():
@@ -381,19 +369,9 @@ class SMDispatcher(Thread):
 
         :return: an instance of the SMDispatcher class.
         """
-
         if SMDispatcher.__instance__ is None:
             SMDispatcher.__instance__ = SMDispatcher()
         return SMDispatcher.__instance__
-
-    def run(self):
-        while True:
-            msg = self.message_queue.get()
-            if msg is not None:
-                statemachine_list = self.statemachines_dict.get(type(msg))
-                if statemachine_list is not None:
-                    for statemachine in statemachine_list:
-                        self.executor.exec(lambda sm: sm.update(msg), statemachine)
 
     def register(self, statemachine: Statemachine):
         """
@@ -402,15 +380,33 @@ class SMDispatcher(Thread):
         Example:
             SMDispatcher.get_instance().register(statemachine)
         """
+        with self.lock:
+            if statemachine is not None:
+                for state in statemachine.states:
+                    for trans in state.transitions:
+                        if trans.transition_type == TransitionType.MESSAGE:
+                            message = cast(Message, trans)
+                            statemachine_list = self.statemachines_dict.get(message.msg_type)
+                            if statemachine_list is None:
+                                statemachine_list = [statemachine]
+                            elif statemachine not in statemachine_list:
+                                statemachine_list.append(statemachine)
+                            self.statemachines_dict[message.msg_type] = statemachine_list
 
-        if statemachine is not None:
-            for state in statemachine.states:
-                for trans in state.transitions:
-                    if trans.transition_type == TransitionType.MESSAGE:
-                        message = cast(Message, trans)
-                        statemachine_list = self.statemachines_dict.get(message.msg_type)
-                        if statemachine_list is None:
-                            statemachine_list = [statemachine]
-                        elif statemachine not in statemachine_list:
-                            statemachine_list.append(statemachine)
-                        self.statemachines_dict[message.msg_type] = statemachine_list
+    def publish(self, msg):
+        """
+        The publish function will look up the state machines
+        that is associated to the message type (register)
+        and apply the update function of the state machine the with the message as argument.
+
+        Example:
+            sm_dispatcher.publish(MyMessage("Hello world"))
+
+        :param msg: The message (instance of a class) to be published.
+        """
+        with self.lock:
+            if msg is not None:
+                statemachine_list = self.statemachines_dict.get(type(msg))
+                if statemachine_list is not None:
+                    for statemachine in statemachine_list:
+                        self.executor.exec(lambda sm: sm.update(msg), statemachine)
