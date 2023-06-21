@@ -52,7 +52,7 @@ class Actor:
 
     def __init__(self, name: str, log_level: int = logging.CRITICAL):
         """
-        The constructor of an Actor.
+        The initialization of an Actor.
 
         Example:
             class MyActor(Actor):
@@ -66,10 +66,13 @@ class Actor:
         self.name = name
         self.logger = logging.getLogger(name) 
         self.logger.setLevel(log_level)
-        self.message = Actor.Message(self.lock)
-        self.scheduler = Actor.Scheduler(self.lock)
+        self.message = Actor._Message(self.lock)
+        self.scheduler = Actor._Scheduler(self.lock)
 
-    class Scheduler:
+    def timer(self, msec: int, func):
+        return Actor._Timer(self.lock)
+
+    class _Scheduler:
         def __init__(self, lock: Lock):
             """
             Do not create instances of this class!
@@ -79,8 +82,7 @@ class Actor:
                 self.scheduler.repeat(...)
                 self.scheduler.remove(...)
             """
-            self.lock = lock
-            self.scheduler = Scheduler.get_instance()
+            self.actor_lock = lock
 
         def once(self, msec: int, func) -> int:
             """
@@ -94,10 +96,10 @@ class Actor:
             :return: job_id
             """
             def _locked_func():
-                with self.lock:
+                with self.actor_lock:
                     func()
 
-            return self.scheduler.once(msec, _locked_func)
+            return Scheduler.get_instance().once(msec, _locked_func)
 
         def repeat(self, msec: int, func) -> int:
             """
@@ -111,12 +113,13 @@ class Actor:
             :return: job id
             """
             def _locked_func():
-                with self.lock:
+                with self.actor_lock:
                     func()
 
-            return self.scheduler.repeat(msec, _locked_func)
+            return Scheduler.get_instance().repeat(msec, _locked_func)
 
-        def remove(self, job_id: int):
+        @staticmethod
+        def remove(job_id: int):
             """
             Scheduler function - will delete the scheduled job.
 
@@ -127,9 +130,9 @@ class Actor:
 
             :param job_id: the job to be removed.
             """
-            self.scheduler.remove(job_id)
+            Scheduler.get_instance().remove(job_id)
 
-    class Message:
+    class _Message:
         def __init__(self, lock: Lock):
             """
             Do not create instances of this class!
@@ -139,14 +142,13 @@ class Actor:
                 self.message.publish(...)
                 self.message.stream(...)
             """
-            self.lock = lock
-            self.sm_dispatcher = SMDispatcher.get_instance()
-            self.msg_dispatcher = Dispatcher.get_instance()
+            self.actor_lock = lock
 
         def subscribe(self, msg_type, func) -> None:
             """
             Message function - The Actor will subscribe to the specified message type
             and call the callback function each time a message of the specified type is published
+
 
             Example:
                 self.message.subscribe(MyMessage, self.func)
@@ -158,12 +160,13 @@ class Actor:
             :param func: A lambda or callback function. The function must take a message argument of the specified type.
             """
             def _locked_func(msg):
-                with self.lock:
+                with self.actor_lock:
                     func(msg)
 
-            self.msg_dispatcher.subscribe(msg_type, _locked_func)
+            Dispatcher.get_instance().subscribe(msg_type, _locked_func)
 
-        def publish(self, msg) -> None:
+        @staticmethod
+        def publish(msg) -> None:
             """
             Message function - The Actor will publish the specified message.
 
@@ -172,8 +175,8 @@ class Actor:
 
             :param msg: The message (instance of a class) to be published.
             """
-            self.sm_dispatcher.publish(msg)
-            self.msg_dispatcher.publish(msg)
+            SMDispatcher.get_instance().publish(msg)
+            Dispatcher.get_instance().publish(msg)
 
         def stream(self, msg_type) -> Observable:
             """
@@ -190,3 +193,43 @@ class Actor:
                 self.subscribe(msg_type, lambda msg: observer.on_next(msg))
                 return observer
             return create(_stream)
+
+    class _Timer:
+        """
+        Do not create instances of this class!
+
+        Access the timer functions using the following constructs:
+            timer = self.timer(...)
+            timer.start()
+            timer.stop()
+        """
+        def __init__(self, lock: Lock, msec: int, func):
+            self.actor_lock = lock
+            self.msec = msec
+            self.func = func
+            self.job_id = None
+
+        def _locked_func(self):
+            with self.actor_lock:
+                self.func()
+
+        def start(self):
+            """
+            Starts or restarts the timer.
+
+            Example:
+                timer.start()
+            """
+            self.stop()
+            self.job_id = Scheduler.get_instance().once(self.msec, self._locked_func())
+
+        def stop(self):
+            """
+            Stops a running timer.
+
+            Example:
+                timer.stop()
+            """
+            if self.job_id is not None:
+                Scheduler.get_instance().remove(self.job_id)
+                self.job_id = None

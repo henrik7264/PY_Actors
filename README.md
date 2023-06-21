@@ -277,7 +277,7 @@ self.scheduler.once(...)
 self.scheduler.repeat(...)
 self.scheduler.remove(...)
 
-self.timer = Timer(...)
+self.t1 = self.timer(...)
 self.sm = Statemachine(...)
 ```
 
@@ -402,17 +402,18 @@ A timer can at anytime be stopped or restarted if needed. The timer has a timeou
 The timer is activated when it is started, and when it times out the callback function will be executed.
 
 #### Create a timer
-A timer is created as an instance of the Timer class. It takes a timeout time and a callback function as argument.
+A timer is created by calling the timer function of the Actor.
+It takes a timeout time and a callback function as argument.
 The Timer is activated at the moment it is started.
 
 ```python
-self.timer = Timer(1000, self.func)  # Create a timer
+t1 = self.timer(1000, self.func)  # Create a timer
 ...
-self.timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+t1.start()  # Start the timer. It will timeout 1000ms from this moment.
 ...
-self.timer.stop()  # Stop the timer.
+t1.stop()  # Stop the timer.
 ...
-self.timer.start() # Restart the timer.  It will timeout 1000ms from this moment.
+t1.start() # Restart the timer.  It will timeout 1000ms from this moment.
 ```
 
 #### Start a timer
@@ -425,8 +426,8 @@ def start(self) -> None
 
 ##### Example
 ```python
-self.timer = Timer(1000, self.func)  # Create a timer
-self.timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+t1 = self.timer(1000, self.func)  # Create a timer
+t1.start()  # Start the timer. It will timeout 1000ms from this moment.
 
 def func(self):
   self.logger.debug("The timer timedout.")
@@ -443,10 +444,10 @@ def stop(self) -> None
 
 ##### Example
 ```python
-self.timer = Timer(1000, self.func)  # Create a timer
-self.timer.start()  # Start the timer. It will timeout 1000ms from this moment.
+t1 = self.timer(1000, self.func)  # Create a timer
+t1.start()  # Start the timer. It will timeout 1000ms from this moment.
 
-self.timer.stop()  # Stop the timer. The timer is inactivated and it will not time out.
+t1.stop()  # Stop the timer. The timer is inactivated and it will not time out.
 
 def func(self):
   self.logger.debug("The timer timedout.")
