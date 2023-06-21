@@ -196,9 +196,9 @@ class Actor:
         Do not create instances of this class!
 
         Access the timer functions using the following constructs:
-            timer = self.timer(...)
-            timer.start()
-            timer.stop()
+            t1 = self.timer(...)
+            t1.start()
+            t1.stop()
         """
         def __init__(self, lock: Lock, msec: int, func):
             self.actor_lock = lock
@@ -215,7 +215,7 @@ class Actor:
             Starts or restarts the timer.
 
             Example:
-                timer.start()
+                t1.start()
             """
             self.stop()
             self.job_id = Scheduler.get_instance().once(self.msec, self._locked_func())
@@ -225,7 +225,7 @@ class Actor:
             Stops a running timer.
 
             Example:
-                timer.stop()
+                t1.stop()
             """
             if self.job_id is not None:
                 Scheduler.get_instance().remove(self.job_id)
