@@ -69,9 +69,6 @@ class Actor:
         self.message = Actor._Message(self.lock)
         self.scheduler = Actor._Scheduler(self.lock)
 
-    def timer(self, msec: int, func):
-        return Actor._Timer(self.lock)
-
     class _Scheduler:
         def __init__(self, lock: Lock):
             """
@@ -233,3 +230,7 @@ class Actor:
             if self.job_id is not None:
                 Scheduler.get_instance().remove(self.job_id)
                 self.job_id = None
+
+    def timer(self, msec: int, func) -> _Timer:
+        return Actor._Timer(self.lock, msec, func)
+
