@@ -23,6 +23,7 @@ My inspiration for this project originates from the following sources:
 * RxROS2 (https://github.com/rosin-project/rxros2)
 * Reactive Programming (https://reactivex.io)
 * Reactive systems (https://www.reactivemanifesto.org)
+* CPP_Actors (https://github.com/henrik7264/CPP_Actors)
 
 Although there are several references to ROS, the library has as such nothing to do with programming robots.
 It is a general purpose library/framework for creating reactive systems using Actors.
