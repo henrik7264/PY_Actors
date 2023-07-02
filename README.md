@@ -79,14 +79,14 @@ I foresee at least two phases for the library. Phase1 is related to only adding 
   When we take this view reactive programming becomes a natural way of processing the messages. 
   See some of the advantages of using reactive programming on ttps://reactivex.io - they are awesome.
 
-<p style="text-align:center">
+<p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase1.png" height="400"><br>
   Phase1: Focus is to provide different features for Actors.
 </p>
 
 The second phase is only related to create a distributed system of Actors that can communicate with each other on multiple platforms and hosts.
 
-<p style="text-align:center">
+<p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Phase2.png" height="400"><br>
   Phase2: Focus is to provide a distributed environment for sharing messages between Actors.
 </p>
@@ -216,7 +216,7 @@ A callback function is associated to each subscription.
 Each time a message is published the set of callback functions that have subscribed to the message will be executed.
 This takes place in the Dispatcher where a number of Worker threads will take care of the execution.
 
-<p style="text-align:right">
+<p align="center">
   <img src="https://github.com/henrik7264/Actors/blob/main/images/Actors_Publish_Subscribe.png"><br>
   Sequence diagram showing the subscribe and publish mechanism of the Actors Library.
 </p>
