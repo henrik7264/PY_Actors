@@ -398,7 +398,7 @@ self.scheduler.remove(job_id)  # The job is canceled and removed.
 ```
 
 ### Timers
-Timers are simular to schedulers, except a timer must be started before it is activated.
+Timers are similar to schedulers, except a timer must be started before it is activated.
 A timer can at anytime be stopped or restarted if needed. The timer has a timeout and a callback function.
 The timer is activated when it is started, and when it times out the callback function will be executed.
 
