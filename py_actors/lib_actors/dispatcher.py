@@ -13,8 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from threading import Lock
-from lib_actors.executor import Executor
+import os
+from queue import Queue
+from threading import Thread, Lock
+
+class Worker(Thread):
+    def __init__(self):
+        super().__init__(daemon=True)
+        self.worker_queue = Queue()
+        self.start()
+
+    def run(self):
+        while True:
+            func, arg = self.worker_queue.get()
+            func(arg)
+
+
+Workers = []
+No_Workers = os.cpu_count()
+for i in range(No_Workers):  # Start the workers.
+    Workers.append(Worker())
 
 
 class Dispatcher:
@@ -40,8 +58,7 @@ class Dispatcher:
         Do not create instances of this class! Dispatcher is a singleton.
         """
         self.lock = Lock()  # To ensure that subscribe and publish function are executed in a thread safe manner
-        self.functions_dict = {}  # List of functions/callbacks for each message type {Type1: [cb1, cb2], Type2: [cb3]}
-        self.executor = Executor.get_instance()  # Executes the functions.
+        self.cb_dict = {}  # List of functions/callbacks for each message type {Type1: {id1: cb1, id2: cb2}, Type2: {id3: cb3}}
 
     @staticmethod
     def get_instance():
@@ -57,12 +74,12 @@ class Dispatcher:
             Dispatcher.__instance__ = Dispatcher()
         return Dispatcher.__instance__
 
-    def subscribe(self, msg_type, func):
+    def register_cb(self, func, msg_type):
         """
         An Actor can subscribe to a message and get a callback function executed each time a message is published.
 
         Example:
-            dispatcher.subscribe(MyMessage, self.func)
+            dispatcher.register_cb(self.func, MyMessage)
 
             def func(self, msg: MyMessage):
                 self.logger.debug("Received a MyMessage: " + msg.data)
@@ -71,11 +88,21 @@ class Dispatcher:
         :param func: A lambda or callback function. The function must take a message argument of the specified type.
         """
         with self.lock:
-            func_list = self.functions_dict.get(msg_type)
-            if func_list is None:
-                func_list = []
-            func_list.append(func)
-            self.functions_dict[msg_type] = func_list
+            func_id = id(func)
+            func_dict = self.cb_dict.get(msg_type)
+            if func_dict is None:
+                self.cb_dict[msg_type] = {func_id: func}
+            else:
+                func_dict[func_id] = func
+            return func_id
+
+    def unregister_cb(self, func_id, msg_type):
+        with self.lock:
+            func_dict = self.cb_dict.get(msg_type)
+            if func_dict is not None:
+                func_dict.pop(func_id)
+                if not func_dict:
+                    self.cb_dict.pop(msg_type)
 
     def publish(self, msg):
         """
@@ -90,7 +117,9 @@ class Dispatcher:
         :param msg: The message (instance of a class) to be published.
         """
         with self.lock:
-            function_list = self.functions_dict.get(type(msg))
-            if function_list is not None:
-                for func in function_list:
-                    self.executor.exec(func, msg)
+            msg_type = type(msg)
+            func_dict = self.cb_dict.get(msg_type)
+            if func_dict is not None:
+                worker = Workers[id(msg_type) % No_Workers]
+                for func in func_dict.values():
+                    worker.worker_queue.put((func, msg))

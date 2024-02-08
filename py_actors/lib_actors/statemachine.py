@@ -17,7 +17,7 @@ import inspect
 from typing import cast
 from enum import Enum
 from threading import Lock
-from lib_actors.executor import Executor
+from lib_actors.dispatcher import Dispatcher
 from lib_actors.scheduler import Scheduler
 
 
@@ -67,10 +67,10 @@ class Transition:
         :param next_state: The next state of the statemachine. Set as part of a transition is triggered.
         """
 
-        self.statemachine = None
         self.transition_type = transition_type
         self.action = action
         self.next_state = next_state
+        self.statemachine = None
 
     def set_statemachine(self, statemachine):
         """
@@ -98,29 +98,30 @@ class Message(Transition):
         Finally, it must specify a next state which the statemachine will be in the transition is complete.
 
         Example:
-            Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED)),
+            Message(OpenDoorMsg, action=self.open_door, next_state=States.DOOR_OPENED),
 
         :param msg_type: The specific message type that will trigger the transition.
         :param action: A callback function that is executed when the transition is triggered.
         :param next_state: The next state of the statemachine when then transition is complete.
         """
-
         super().__init__(transition_type=TransitionType.MESSAGE, action=action, next_state=next_state)
         self.msg_type = msg_type
 
-    def update(self, msg):
+    def do_action(self, msg):
         """
         Internal function - do not use!
         Actual execution of the action callback function of the transition.
 
         :param msg: A message published by an Actor.
         """
-
-        if self.action is not None:
-            with self.statemachine.actor_lock:
-                self.action(msg)
-        if self.next_state is not None:
-            self.statemachine.set_current_state(self.next_state)
+        curr_state = self.statemachine.current_state
+        with self.statemachine.transition_lock:
+            if curr_state == self.statemachine.current_state:
+                if self.action is not None:
+                    with self.statemachine.actor_lock:
+                        self.action(msg)
+                if self.next_state is not None:
+                    self.statemachine.set_current_state(self.next_state)
 
 
 class Timer(Transition):
@@ -137,7 +138,7 @@ class Timer(Transition):
         Finally, it must specify a next state which the statemachine will be in the transition is complete.
 
         Example:
-            Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)),
+            Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED),
 
         :param timeout: The timeout in milliseconds. When the timer times out the transition will be triggered.
         :param action: A callback function that is executed when the transition is triggered.
@@ -147,14 +148,14 @@ class Timer(Transition):
         super().__init__(transition_type=TransitionType.TIMER, action=action, next_state=next_state)
         self.timeout = timeout
 
-    def update(self):
+    def do_action(self):
         """
         Internal function - do not use!
         Actual execution of the action callback function of the transition.
         """
-
-        if not self.statemachine.sm_lock.locked():  # if a transition is already being executed, drop the timeout.
-            with self.statemachine.sm_lock:  # lock the state machine while executing a transition.
+        curr_state = self.statemachine.current_state
+        with self.statemachine.transition_lock:
+            if curr_state == self.statemachine.current_state:
                 if self.action is not None:
                     with self.statemachine.actor_lock:
                         self.action()
@@ -197,15 +198,14 @@ class State:
         :param state_name: The name of a State, typically an enum, i.e. integer.
         :param transitions: A number of transitions that when triggered will change the state of the statemachine.
         """
-
         self.state_name = state_name  # typically an enum, i.e. integer
         self.transitions = transitions  # The transitions of a state
-        self.message_dict = {}  # {MsgType1: Trans1, MsgType2: Trans2, ...}
+        self.message_list = []  # [(MsgType1 Trans1), (MsgType2: Trans2), ...}
         self.timers_list = []  # [Trans3, Trans4 ...]
         for trans in self.transitions:
             if trans.transition_type == TransitionType.MESSAGE:
                 message = cast(Message, trans)
-                self.message_dict[message.msg_type] = message
+                self.message_list.append((message, message.msg_type))
             elif trans.transition_type == TransitionType.TIMER:
                 timer = cast(Timer, trans)
                 self.timers_list.append(timer)
@@ -218,24 +218,8 @@ class State:
 
         :param statemachine: A Statemachine.
         """
-
         for trans in self.transitions:
             trans.set_statemachine(statemachine)
-
-    def update(self, msg):
-        """
-        Internal function - do not use!
-
-        The function works as follows: The Statemachine will call this function with a message
-        that has been published by an Actor. update will then look up the transition that is triggered
-        by this message and calls its update function.
-
-        :param msg: A message published by an Actor.
-        """
-
-        trans = self.message_dict.get(type(msg))
-        if trans is not None:
-            trans.update(msg)
 
 
 class Statemachine:
@@ -278,19 +262,21 @@ class Statemachine:
         :param states: A number of states of the statemachine.
         """
         actor = inspect.currentframe().f_back.f_locals["self"]  # Dirty trick to get the Actor instance.
-        assert(hasattr(actor, "lock"))
+        assert hasattr(actor, "lock")
         self.actor_lock = actor.lock  # Lock from Actor to synchronize callback functions.
-        self.sm_lock = Lock() # Lock to ensure that only transition is executing at a time.
+        self.transition_lock = Lock()
+        self.statemachine_lock = Lock()  # Lock to ensure statemachine synchronization.
         self.current_state = None  # Current state of the Statemachine, typically an enum, i.e. integer
         self.states = states  # The states of a statemachine
         self.state_dict = {}  # { name1: State1, name2: State2, ...}, name is typically an enum, i.e. integer
-        self.scheduler = Scheduler.get_instance()  # Scheduler instance
-        self.scheduled_jobs = []  # [job_id1, job_id2, ...]
+        self.scheduler = Scheduler.get_instance()
+        self.dispatcher = Dispatcher.get_instance()
+        self.jobs = []  # [job_id1, job_id2, ...]
+        self.subscriptions = []  # [(sub_id1, msg_type1), (sub_id2, msg_type2) ...]
         for state in self.states:
             state.set_statemachine(self)
             self.state_dict[state.state_name] = state
         self.set_current_state(initial_state)
-        SMDispatcher.get_instance().register(self)
 
     def get_current_state(self):
         """
@@ -301,7 +287,8 @@ class Statemachine:
 
         :return: Current state of the statemachine. Typically, an enum or integer.
         """
-        return self.current_state
+        with self.statemachine_lock:
+            return self.current_state
 
     def set_current_state(self, new_state):
         """
@@ -312,102 +299,22 @@ class Statemachine:
 
         :param new_state: The new/current state of the statemachine.
         """
-        for job_id in self.scheduled_jobs:
-            self.scheduler.remove(job_id)
-        self.scheduled_jobs = []
-        if new_state is not None:
-            self.current_state = new_state
-        state = self.state_dict.get(self.current_state)
-        if state is not None:
-            for trans in state.timers_list:
-                timer = cast(Timer, trans)
-                self.scheduled_jobs.append(self.scheduler.once(timer.timeout, timer.update))
+        with self.statemachine_lock:
+            for job_id in self.jobs:
+                self.scheduler.remove(job_id)
+            self.jobs = []
+            for (sub_id, msg_type) in self.subscriptions:
+                self.dispatcher.unregister_cb(sub_id, msg_type)
+            self.subscriptions = []
 
-    def update(self, msg):
-        """
-        Internal function - do not use!
+            if new_state is not None:
+                self.current_state = new_state
 
-        The update function works as follows: A Worker of the SMDispatcher class calls update
-        with a message that has been published by an Actor. Update will pass this message
-        to the current State by calling its update function.
-
-        :param msg: A message published by an Actor.
-        """
-        with self.sm_lock:  # ensure that there is only one transition that is executed at a time.
             state = self.state_dict.get(self.current_state)
             if state is not None:
-                state.update(msg)
-
-
-class SMDispatcher:
-    """
-    The SMDispatcher class keeps track of all created state machines.
-
-    Each statemachine must register itself calling the register function.
-    Part of registration is to walk through the statemachine and associate
-    each transition that is triggered by message to the statemachine. This
-    will allow for easy look up of state machines that should be updated
-    when a message is published.
-    """
-
-    __instance__ = None  # A SMDispatcher class is a singleton.
-
-    def __init__(self):
-        """
-        Do not create instances of this class! SMDispatcher is a singleton.
-        """
-        self.statemachines_dict = {}  # {MsgType1: [sm1, sm2], MsgType2: [sm33], ...}
-        self.lock = Lock()  # To ensure that register and publish function are executed in a thread safe manner
-        self.executor = Executor.get_instance()  # Executes the functions.
-
-    @staticmethod
-    def get_instance():
-        """
-        The SMDispatcher class is a singleton and should only be accessed through this function.
-
-        Example:
-            sm_dispatcher = SMDispatcher.get_instance()
-
-        :return: an instance of the SMDispatcher class.
-        """
-        if SMDispatcher.__instance__ is None:
-            SMDispatcher.__instance__ = SMDispatcher()
-        return SMDispatcher.__instance__
-
-    def register(self, statemachine: Statemachine):
-        """
-        Registers a statemachine.
-
-        Example:
-            SMDispatcher.get_instance().register(statemachine)
-        """
-        with self.lock:
-            if statemachine is not None:
-                for state in statemachine.states:
-                    for trans in state.transitions:
-                        if trans.transition_type == TransitionType.MESSAGE:
-                            message = cast(Message, trans)
-                            statemachine_list = self.statemachines_dict.get(message.msg_type)
-                            if statemachine_list is None:
-                                statemachine_list = [statemachine]
-                            elif statemachine not in statemachine_list:
-                                statemachine_list.append(statemachine)
-                            self.statemachines_dict[message.msg_type] = statemachine_list
-
-    def publish(self, msg):
-        """
-        The publish function will look up the state machines
-        that is associated to the message type (register)
-        and apply the update function of the state machine the with the message as argument.
-
-        Example:
-            sm_dispatcher.publish(MyMessage("Hello world"))
-
-        :param msg: The message (instance of a class) to be published.
-        """
-        with self.lock:
-            if msg is not None:
-                statemachine_list = self.statemachines_dict.get(type(msg))
-                if statemachine_list is not None:
-                    for statemachine in statemachine_list:
-                        self.executor.exec(lambda sm: sm.update(msg), statemachine)
+                for timer in state.timers_list:
+                    job_id = self.scheduler.once(timer.timeout, timer.do_action)
+                    self.jobs.append(job_id)
+                for (message, msg_type) in state.message_list:
+                    sub_id = self.dispatcher.register_cb(message.do_action, msg_type)
+                    self.subscriptions.append((sub_id, msg_type))

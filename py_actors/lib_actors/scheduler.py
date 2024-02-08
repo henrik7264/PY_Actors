@@ -15,8 +15,23 @@
 
 import sys
 from time import time
-from threading import Thread, Event, Lock
-from lib_actors.executor import Executor
+from queue import Queue
+from threading import Thread, Condition
+
+
+class Worker(Thread):
+    def __init__(self):
+        super().__init__(daemon=True)
+        self.worker_queue = Queue()
+        self.start()
+
+    def run(self):
+        while True:
+            func = self.worker_queue.get()
+            func()
+
+
+Worker = Worker()
 
 
 class Scheduler(Thread):
@@ -41,11 +56,9 @@ class Scheduler(Thread):
         Do not create instances of this class! Scheduler is a singleton.
         """
         super().__init__(daemon=True)
+        self.condition = Condition()  # Control synchronisation of the scheduler
         self.job_id = 0  # unique id that is returned each time a job is scheduled.
         self.jobs = {}  # { job_id1: (timeout1, msec1, f1, repeat1), job_id2: (timeout2, msec2, f2, repeat2), ...}
-        self.executor = Executor.get_instance()  # Execute functions
-        self.event = Event()  # Control if the wait should be blocked or not
-        self.lock = Lock()  # Synchronize critical regions/data.
         self.start()
 
     @staticmethod
@@ -64,25 +77,22 @@ class Scheduler(Thread):
 
     def run(self):
         while True:
-            if len(self.jobs) == 0:
-                self.event.wait()
-                self.event.clear()
-            else:
+            with self.condition:
+                while not self.jobs:
+                    self.condition.wait()
+
                 next_timeout = sys.float_info.max
-                with self.lock:
-                    for job_id, (job_timeout, job_msec, job_func, job_repeat) in self.jobs.items():
-                        if job_repeat > 0 and job_timeout < next_timeout:
-                            next_timeout = job_timeout
+                for job_id, (job_timeout, job_msec, job_func, job_repeat) in self.jobs.items():
+                    if job_repeat > 0 and job_timeout < next_timeout:
+                        next_timeout = job_timeout
                 current_time = time()
                 if next_timeout > current_time:
-                    self.event.wait(timeout=next_timeout-current_time)
-                    self.event.clear()
+                    self.condition.wait(timeout=next_timeout-current_time)
 
-            current_time = time()
-            with self.lock:
+                current_time = time()
                 for job_id, (job_timeout, job_msec, job_func, job_repeat) in self.jobs.items():
                     if job_repeat > 0 and job_timeout <= current_time:
-                        self.executor.exec(job_func)
+                        Worker.worker_queue.put(job_func)
                         self.jobs[job_id] = (job_timeout+float(job_msec)/1000.0, job_msec, job_func, job_repeat-1)
 
     def once(self, msec: int, func) -> int:
@@ -96,10 +106,10 @@ class Scheduler(Thread):
         :param func: call back function to be executed when the job times out.
         :return: job_id
         """
-        with self.lock:
+        with self.condition:
             self.job_id += 1
             self.jobs[self.job_id] = (time()+float(msec)/1000.0, msec, func, 1)
-            self.event.set()
+            self.condition.notify()
             return self.job_id
 
     def repeat(self, msec: int, func) -> int:
@@ -113,10 +123,10 @@ class Scheduler(Thread):
         :param func: call back function to be executed when the job times out.
         :return: job id
         """
-        with self.lock:
+        with self.condition:
             self.job_id += 1
             self.jobs[self.job_id] = (time()+float(msec)/1000.0, msec, func, sys.maxsize)
-            self.event.set()
+            self.condition.notify()
             return self.job_id
 
     def remove(self, job_id: int):
@@ -130,7 +140,7 @@ class Scheduler(Thread):
 
         :param job_id: the job to be removed.
         """
-        with self.lock:
+        with self.condition:
             if self.jobs.get(job_id) is not None:
                 self.jobs.pop(job_id)
-                self.event.set()
+                self.condition.notify()

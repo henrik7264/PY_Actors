@@ -22,7 +22,7 @@ class Subscriber(Actor):
     def __init__(self):
         super().__init__("Subscriber", logging.NOTSET)
         self.count = 0
-        self.message.subscribe(Message, self.sub)
+        self.message.subscribe(self.sub, Message)
 
     def sub(self, msg: Message):
         self.logger.info(msg.data)

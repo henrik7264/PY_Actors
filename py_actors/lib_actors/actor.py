@@ -16,9 +16,10 @@
 import logging
 from reactivex import create, Observable
 from threading import Lock
-from lib_actors.scheduler import Scheduler
 from lib_actors.dispatcher import Dispatcher
-from lib_actors.statemachine import SMDispatcher
+from lib_actors.scheduler import Scheduler
+from lib_actors.timer import Timer
+
 
 logging.basicConfig(level=logging.NOTSET,
                     format='%(asctime)s %(name)s %(levelname)s: %(message)s',
@@ -69,6 +70,71 @@ class Actor:
         self.logger.setLevel(log_level)
         self.message = Actor._Message(self.lock)
         self.scheduler = Actor._Scheduler(self.lock)
+
+    class _Message:
+        def __init__(self, lock: Lock):
+            """
+            Do not create instances of this class!
+
+            Access the scheduler functions using the following constructs:
+                self.message.subscribe(...)
+                self.message.publish(...)
+                self.message.stream(...)
+            """
+            self.actor_lock = lock
+
+        def subscribe(self, func, msg_type):
+            """
+            Message function - The Actor will subscribe to the specified message type
+            and call the callback function each time a message of the specified type is published
+
+
+            Example:
+                self.message.subscribe(MyMessage, self.func)
+
+                def func(self, msg: MyMessage):
+                    self.logger.debug("Received a MyMessage: " + msg.data)
+
+            :param msg_type: A reference to a class/message.
+            :param func: A lambda or callback function. The function must take a message argument of the specified type.
+            :return
+            """
+            def _locked_func(msg):
+                with self.actor_lock:
+                    func(msg)
+            return Dispatcher.get_instance().register_cb(_locked_func, msg_type)
+
+        @staticmethod
+        def unsubscribe(sub_id, msg_type) -> None:
+            Dispatcher.get_instance().unregister_cb(sub_id, msg_type)
+
+        @staticmethod
+        def publish(msg) -> None:
+            """
+            Message function - The Actor will publish the specified message.
+
+            Example:
+                self.message.publish(MyMessage("Hello world"))
+
+            :param msg: The message (instance of a class) to be published.
+            """
+            Dispatcher.get_instance().publish(msg)
+
+        def stream(self, msg_type) -> Observable:
+            """
+            Message function - This function will return a rx.Observable stream
+            of messages of the specified message type.
+
+            Example:
+                observable = self.message.stream(MyMessage)
+                observable.subscribe(...)
+
+            :param msg_type: A reference to a class/message.
+            """
+            def _stream(observer, scheduler=None):
+                self.subscribe(msg_type, lambda msg: observer.on_next(msg))
+                return observer
+            return create(_stream)
 
     class _Scheduler:
         def __init__(self, lock: Lock):
@@ -130,108 +196,5 @@ class Actor:
             """
             Scheduler.get_instance().remove(job_id)
 
-    class _Message:
-        def __init__(self, lock: Lock):
-            """
-            Do not create instances of this class!
-
-            Access the scheduler functions using the following constructs:
-                self.message.subscribe(...)
-                self.message.publish(...)
-                self.message.stream(...)
-            """
-            self.actor_lock = lock
-
-        def subscribe(self, msg_type, func) -> None:
-            """
-            Message function - The Actor will subscribe to the specified message type
-            and call the callback function each time a message of the specified type is published
-
-
-            Example:
-                self.message.subscribe(MyMessage, self.func)
-
-                def func(self, msg: MyMessage):
-                    self.logger.debug("Received a MyMessage: " + msg.data)
-
-            :param msg_type: A reference to a class/message.
-            :param func: A lambda or callback function. The function must take a message argument of the specified type.
-            """
-            def _locked_func(msg):
-                with self.actor_lock:
-                    func(msg)
-
-            Dispatcher.get_instance().subscribe(msg_type, _locked_func)
-
-        @staticmethod
-        def publish(msg) -> None:
-            """
-            Message function - The Actor will publish the specified message.
-
-            Example:
-                self.message.publish(MyMessage("Hello world")
-
-            :param msg: The message (instance of a class) to be published.
-            """
-            SMDispatcher.get_instance().publish(msg)
-            Dispatcher.get_instance().publish(msg)
-
-        def stream(self, msg_type) -> Observable:
-            """
-            Message function - This function will return a rx.Observable stream
-            of messages of the specified message type.
-
-            Example:
-                observable = self.message.stream(MyMessage)
-                observable.subscribe(...)
-
-            :param msg_type: A reference to a class/message.
-            """
-            def _stream(observer, scheduler=None):
-                self.subscribe(msg_type, lambda msg: observer.on_next(msg))
-                return observer
-            return create(_stream)
-
-    class _Timer:
-        """
-        Do not create instances of this class!
-
-        Access the timer functions using the following constructs:
-            t1 = self.timer(...)
-            t1.start()
-            t1.stop()
-        """
-        def __init__(self, lock: Lock, msec: int, func):
-            self.actor_lock = lock
-            self.msec = msec
-            self.func = func
-            self.job_id = None
-
-        def _locked_func(self):
-            with self.actor_lock:
-                self.func()
-
-        def start(self):
-            """
-            Starts or restarts the timer.
-
-            Example:
-                t1.start()
-            """
-            self.stop()
-            self.job_id = Scheduler.get_instance().once(self.msec, self._locked_func())
-
-        def stop(self):
-            """
-            Stops a running timer.
-
-            Example:
-                t1.stop()
-            """
-            if self.job_id is not None:
-                Scheduler.get_instance().remove(self.job_id)
-                self.job_id = None
-
-    def timer(self, msec: int, func) -> _Timer:
-        return Actor._Timer(self.lock, msec, func)
-
+        def timer(self, msec: int, func):
+            return Timer(self.actor_lock, msec, func)

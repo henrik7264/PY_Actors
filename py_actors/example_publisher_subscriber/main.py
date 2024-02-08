@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import time
-from lib_actors.executor import Executor
 from example_publisher_subscriber.publish_actor import Publisher
 from example_publisher_subscriber.subscribe_actor import Subscriber
 
@@ -26,5 +25,4 @@ if __name__ == "__main__":
     time.sleep(10.0)
     print(actors[0].count)
     print(actors[1].count)
-    print(len(Executor.get_instance().workers))
     exit(0)
