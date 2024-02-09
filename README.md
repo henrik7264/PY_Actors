@@ -173,7 +173,7 @@ class MyMessage:
 ```
 
 #### Operations on messages
-There are two operations which can be applied on messages: This is to subscribe to a message and to publish a message.
+There are three operations which can be applied on messages: This is to subscribe, unsubscribe and to publish a message.
 
 #### Subscribe to a Message
 An Actor subscribes to a specific message type by providing a callback function
@@ -181,26 +181,44 @@ that is executed each time a message of that type is published.
 
 ##### The 'subscribe' function 
 ```python
-def subscribe(self, msg_type, func) -> None
+def subscribe(self, func, msg_type) -> int:
 
-# msg_type: A reference to a class/message.
 # func: A lambda or callback function. The function must take a message argument of the specified type.
+# msg_type: A reference to a class/message.
+# return a subscription id (int).
 ```
 
 ##### Example
 ```python
-self.message.subscribe(MyMessage, self.func)
+self.message.subscribe(self.func, MyMessage)
 
 def func(self, msg: MyMessage):
   self.logger.debug("Received a MyMessage: " + msg.name + ", " + str(msg.count))
 ```
+
+##### The 'unsubscribe' function 
+```python
+def unsubscribe(self, sub_id: int, msg_type) -> None:
+
+# sub_id: subscription id (int) returned from a subscription
+# msg_type: A reference to a class/message.
+```
+
+##### Example
+```python
+...
+sub_id = self.message.subscribe(self.func, MyMessage)
+```
+self.message.unsubscribe(sub_id, MyMessage)
+...
+
 
 #### Publish a Message
 An Actor publishes messages by means of the publish function. 
 
 ##### The 'publish' function
 ```python
-def publish(self, msg) -> None
+def publish(self, msg) -> None:
 
 # msg: The message (instance of a class) to be published.
 ```
@@ -213,7 +231,7 @@ self.message.publish(MyMessage("Hello world", 1234))
 The sequence diagram below shows how the subscription and publishing of messages work.
 The Actor starts by subscribing to a number of messages (message types). 
 A callback function is associated to each subscription.
-Each time a message is published the set of callback functions that have subscribed to the message will be executed.
+Each time a message is published the set of callback functions that have subscribed to the message type will be executed.
 This takes place in the Dispatcher where a number of Worker threads will take care of the execution.
 
 <p align="center">
@@ -226,9 +244,10 @@ There are some problems related to this execution model/architecture:
    This could in worse case lead to thread synchronization problems. The Actors library solves this problem by allowing
    only one callback function per Actor to be executed at a time, i.e. 100 Actors can concurrently execute 100 callback functions,
    but one Actor can only execute one callback function at a time.
-2. A heavy message load may create the situation described in item 1. To accommodate for this problem,
-   the Actors library will adapt the number of Workers to the message load, i.e. another Worker will be added to the Dispatcher
-   if the messages cannot be handled as fast as they arrive. This can in worse case lead to a large amount Workers (threads).
+2. A heavy message load may create the situation described in item 1. The actors library accommodates for this 
+   by providing a number of threads (equals to the number of CPU cores) that will execute the callback functions.
+   If the messages cannot be handled as fast as they arrive the queues associated to the threads will start to grow and
+   the system will become unresponsive and unpredictable.
 
 The problems described above are common for this kind of architecture.
 There is no real solution to the problem except that the architect and programmer must ensure
@@ -265,6 +284,7 @@ This includes:
 
 ```python
 self.message.subscribe(...)
+self.message.unsubscribe(...)
 self.message.publish(...)
 self.message.stream(...)
 
@@ -277,13 +297,13 @@ self.logger.critical(...)
 self.scheduler.once(...)
 self.scheduler.repeat(...)
 self.scheduler.remove(...)
+self.scheduler.timer(...)
 
-self.t1 = self.timer(...)
 self.sm = Statemachine(...)
 ```
 
 Observe how the functions are organized into logical groups. This makes it very easy to understand and use them.
-Only Timer and Statemachine are a bit different due to their usage/nature. 
+Only Statemachine is a bit different due to its nature. 
 
 ### Logging
 The logging interface of the Actors library is based on the Python logging library.
@@ -317,9 +337,8 @@ The code will produce the following log entry:
 ### Scheduler
 A Scheduler can be used to execute a task (function call) at a given time.
 The task can be executed once or repeated until it is removed.
-The scheduled tasks are executed by an adaptable number of Workers.
-If the Workers are not able to execute the tasks as requested by the scheduler additional Workers will be started. 
-This situation happens when many tasks are scheduled at the same time.
+The scheduled tasks are executed by a single Worker/Thread.
+If the Worker is not able to execute the tasks as requested by the Scheduler the thread queue will start to grow.
 The situation is not different from handling messages (see above section) - in fact it is exactly the same,
 and the Actors library will behave the same way:
 
@@ -327,9 +346,9 @@ and the Actors library will behave the same way:
    This could in worse case lead to thread synchronization problems. 
    The Actors library solves this problem by allowing only one task per Actor to execute at a time, 
    i.e. 100 Actors can concurrently execute 100 tasks, but one Actor can only execute one task at a time.
-2. A heavy scheduler load may create the situation described in item 1. To accommodate for this problem, 
-   the Actors library will adapt the number of Workers, i.e. another Worker will be added 
-   if the tasks cannot be handled as fast as they are triggered. This can in worse case lead to a large amount Workers (threads).
+2. A heavy scheduler load may create the situation described in item 1. 
+   If the tasks cannot be handled as fast as they are scheduled the queues associated with the Worker will start to grow and
+   the system will become unresponsive and unpredictable.
 3. Scheduled tasks and message handling works under the same principles as described above.
    Only one task/callback function can be executed at time per Actor to avoid synchronization problems.
 
@@ -348,7 +367,7 @@ def once(self, msec: int, func) -> int:
 
 # msec: timeout in milliseconds.
 # func: call back function to be executed when the job times out.
-# return: job_id
+# return: job_id (int)
 ```
 
 ##### Example
@@ -369,7 +388,7 @@ def repeat(self, msec: int, func) -> int:
 
 # msec: timeout in milliseconds.
 # func: call back function to be executed when the job times out.
-# return: job_id
+# return: job_id (int)
 ```
 
 ##### Example
@@ -393,7 +412,7 @@ def remove(self, job_id: int) -> None:
 ##### Example
 ```python
 job_id = self.scheduler.repeat(1000, self.task)  # A new job has been scheduled.
-
+...
 self.scheduler.remove(job_id)  # The job is canceled and removed.
 ```
 
@@ -403,12 +422,12 @@ A timer can at anytime be stopped or restarted if needed. The timer has a timeou
 The timer is activated when it is started, and when it times out the callback function will be executed.
 
 #### Create a timer
-A timer is created by calling the timer function of the Actor.
+A timer is created by calling the scheduler.timer function.
 It takes a timeout time and a callback function as argument.
 The Timer is activated at the moment it is started.
 
 ```python
-t1 = self.timer(1000, self.func)  # Create a timer
+t1 = self.scheduler.timer(1000, self.func)  # Create a timer
 ...
 t1.start()  # Start the timer. It will timeout 1000ms from this moment.
 ...
@@ -427,7 +446,7 @@ def start(self) -> None
 
 ##### Example
 ```python
-t1 = self.timer(1000, self.func)  # Create a timer
+t1 = self.scheduler.timer(1000, self.func)  # Create a timer
 t1.start()  # Start the timer. It will timeout 1000ms from this moment.
 
 def func(self):
@@ -440,18 +459,19 @@ The stop function will inactivate the timer and preventing it from timing out.
 
 ##### The 'stop' function 
 ```python
-def stop(self) -> None
+def stop(self) -> None:
 ```
 
 ##### Example
 ```python
-t1 = self.timer(1000, self.func)  # Create a timer
-t1.start()  # Start the timer. It will timeout 1000ms from this moment.
-
-t1.stop()  # Stop the timer. The timer is inactivated and it will not time out.
-
 def func(self):
   self.logger.debug("The timer timedout.")
+
+t1 = self.scheduler.timer(1000, self.func)  # Create a timer
+...
+t1.start()  # Start the timer. It will timeout 1000ms from this moment.
+...
+t1.stop()  # Stop the timer. The timer is inactivated and it will not time out.
 ```
 
 ### State Machines
@@ -509,9 +529,6 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                       Transition(...)))
 ```
 
-A state id is identified by a unique number, string, enumeration etc. Use enumerations as shown above.
-This is a nice way to define state ids.
-
 Two types of transitions can be used. That is the Message transition 
 which is triggered by a Message that is published by an Actor, and the Timer transition
 that is triggered by a timer timeout.
@@ -529,10 +546,6 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                       Message(CloseDoorMsg, ...),
                       Timer(1000, ...)))
 ```
-
-Observe that there are some name clashes here. The Timer class with we introduced in the previous chapter
-collides with the Transition Timer class. They are two distinct class with almost the same functionality,
-but one is a Transition to be used together with a Statemachine. The other is just a normal timer object.
 
 #### Creating a Transition
 
@@ -552,9 +565,6 @@ self.sm = Statemachine(States.DOOR_CLOSED,
                              Timer(1000, action=self.auto_close_door, next_state=States.DOOR_CLOSED)))
 ```
 
-Two types of transitions exists. That is the Message transition which is triggered by a Message event
-published by an Actor, and the Timer transition that is triggered by a timer timeout.
-
 The action part is simply a function or lambda expression that is executed as part handling the transition.
 When the operation is complete the transition will set the new/next state of the state machine.
 Observe that both the action and next_state are optional. 
@@ -564,20 +574,14 @@ Observe that both the action and next_state are optional.
 The state machine is tricky construction, but care has been taken to make it simple and safe to use:
 
 1. A state machine is tightly coupled to an Actor. In fact, the state machine can not be used outside the scope of an Actor.
-2. A transition is an atomic operation, but with some restrictions. It works as follows:
+2. A transition is an "atomic" operation. It works as follows:
    1. A message is published by an Actor.
    2. The state machine will check if it has a transition that is triggered by the message event.
-   3. If this is the case, the state machine will be locked until the transition has been executed.
-   4. A dedicated Worker thread will first execute the action and then set the next state of the state machine.
-   5. The state machine is unlocked and new events can be handled.
-   
-   If a timer timeout during the execution of a transition it will be dropped. 
-   An incoming Message event will be postponed if a transaction is being executed.
+   3. If this is the case, the state machine will be locked until the transition has been executed
+      and the next state has been set.
+   4. The state machine is unlocked and new events can be handled.
 3. An Actor can define more state machines. The state machines are updated concurrently
    and there is no way to determine if one state machine is updated before the other.
-4. The Timer class name collides with the transition Timer class.
-   If you need to use both in the same Actor care must be taken.
-5. The state machine can slow down due to constraints with execution of transitions. 
-6. The implementation of the state machine is complex and needs to be refactored.
+4. The state machine can slow down due to constraints with execution of transitions. 
 
 ### Message Streams

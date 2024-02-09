@@ -17,6 +17,7 @@ import os
 from queue import Queue
 from threading import Thread, Lock
 
+
 class Worker(Thread):
     def __init__(self):
         super().__init__(daemon=True)
@@ -29,8 +30,8 @@ class Worker(Thread):
             func(arg)
 
 
-Workers = []
-No_Workers = os.cpu_count()
+Workers: [Worker] = []
+No_Workers: int = os.cpu_count()
 for i in range(No_Workers):  # Start the workers.
     Workers.append(Worker())
 
@@ -74,7 +75,7 @@ class Dispatcher:
             Dispatcher.__instance__ = Dispatcher()
         return Dispatcher.__instance__
 
-    def register_cb(self, func, msg_type):
+    def register_cb(self, func, msg_type) -> int:
         """
         An Actor can subscribe to a message and get a callback function executed each time a message is published.
 
@@ -96,7 +97,7 @@ class Dispatcher:
                 func_dict[func_id] = func
             return func_id
 
-    def unregister_cb(self, func_id, msg_type):
+    def unregister_cb(self, func_id: int, msg_type):
         with self.lock:
             func_dict = self.cb_dict.get(msg_type)
             if func_dict is not None:
