@@ -22,7 +22,7 @@ def _send_msg(sock: socket.socket, msg):
     sock.sendall(pickled)
 
 
-def _recv_data(sock: socket.socket):
+def _recv_bytes(sock: socket.socket):
     s: str = ''
     c: str = ''
     while c != ':' or s == '':  # look for string with format '#<digits>:'
@@ -46,15 +46,15 @@ def _recv_data(sock: socket.socket):
 
 
 def _recv_str(sock: socket.socket) -> str:
-    return _recv_data(sock).decode()
+    return _recv_bytes(sock).decode()
 
 
 def _recv_int(sock: socket.socket) -> int:
-    return int(_recv_data(sock).decode())
+    return int(_recv_bytes(sock).decode())
 
 
 def _recv_msg(sock: socket.socket) -> bytes:
-    return pickle.loads(_recv_data(sock))
+    return pickle.loads(_recv_bytes(sock))
 
 
 class PeerNode(Thread):
@@ -140,7 +140,11 @@ class Node(Thread, Actor):
             self.addr = '127.0.0.1'
         self.port = port
         self.send_msgs = send_msgs
+        if self.send_msgs is None:
+            self.send_msgs = []
         self.recv_msgs = recv_msgs
+        if self.recv_msgs is None:
+            self.recv_msgs = []
         self.peers: {PeerNode} = {}
         self.conns: {PeerNode} = {}
         self.lock = Lock()
