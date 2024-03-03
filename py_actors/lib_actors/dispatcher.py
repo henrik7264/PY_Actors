@@ -89,7 +89,7 @@ class Dispatcher:
         :param func: A lambda or callback function. The function must take a message argument of the specified type.
         """
         with self.lock:
-            func_id = id(func)
+            func_id = id(func) + id(msg_type)
             func_dict = self.cb_dict.get(msg_type)
             if func_dict is None:
                 self.cb_dict[msg_type] = {func_id: func}
