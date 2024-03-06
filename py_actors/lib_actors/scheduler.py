@@ -141,6 +141,6 @@ class Scheduler(Thread):
         :param job_id: the job to be removed.
         """
         with self.condition:
-            if self.jobs.get(job_id) is not None:
+            if job_id in self.jobs:
                 self.jobs.pop(job_id)
                 self.condition.notify()

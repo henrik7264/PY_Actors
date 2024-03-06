@@ -22,7 +22,7 @@ from example_nodes.messages import *
 
 class Node2(Node):
     def __init__(self):
-        super().__init__('Node2', 'localhost', 8765, [Msg1, Msg2, Msg3, Msg4], [Msg1, Msg3])
+        super().__init__('Node2', 'localhost', 8765, [Msg2, Msg4], [Msg1, Msg3])
         self.node.add_peer('Node1', 'localhost', 5678)
         self.node.add_peer('Node3', 'localhost', 6789)
         self.logger.setLevel(logging.NOTSET)
@@ -35,15 +35,9 @@ class Node2(Node):
     def pub(self):
         rnd = random()
         if rnd < 0.25:
-            self.logger.info("Sending Msg1 ...")
-            self.message.publish(Msg1())
-        elif rnd < 0.5:
             self.logger.info("Sending Msg2 ...")
             self.message.publish(Msg2())
-        elif rnd < 0.75:
-            self.logger.info("Sending Msg3 ...")
-            self.message.publish(Msg3())
-        else:
+        elif rnd < 0.5:
             self.logger.info("Sending Msg4 ...")
             self.message.publish(Msg4())
         self.count += 1

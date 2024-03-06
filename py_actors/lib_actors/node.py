@@ -111,6 +111,11 @@ class PeerNode(Thread):
 
             try:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE,1)  # after idle in sec.
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL,3)  # interval between keepalives
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT,5)  # retries
+
                 self.sock.connect((self.addr, self.port))
                 _send_str(self.sock, "PY_Actors")
                 _send_str(self.sock, "v1.0.0")

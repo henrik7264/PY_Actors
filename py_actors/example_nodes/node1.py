@@ -34,15 +34,6 @@ class Node1(Node):
         if rnd < 0.25:
             self.logger.info("Sending Msg1 ...")
             self.message.publish(Msg1())
-        elif rnd < 0.5:
-            self.logger.info("Sending Msg2 ...")
-            self.message.publish(Msg2())
-        elif rnd < 0.75:
-            self.logger.info("Sending Msg3 ...")
-            self.message.publish(Msg3())
-        else:
-            self.logger.info("Sending Msg4 ...")
-            self.message.publish(Msg4())
         self.count += 1
 
     def sub2(self, msg: Msg2):

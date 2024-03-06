@@ -34,6 +34,11 @@ class Timer:
         self.func = func
         self.job_id = None
 
+    def _stop(self):
+        if self.job_id is not None:
+            Scheduler.get_instance().remove(self.job_id)
+            self.job_id = None
+
     def start(self):
         """
         Starts or restarts the timer.
@@ -41,14 +46,13 @@ class Timer:
         Example:
             t1.start()
         """
-
         def _locked_func():
             with self.actor_lock:
                 self.func()
 
         with self.timer_lock:
-            self.stop()
-            self.job_id = Scheduler.get_instance().once(self.msec, _locked_func())
+            self._stop()
+            self.job_id = Scheduler.get_instance().once(self.msec, _locked_func)
 
     def stop(self):
         """
@@ -58,6 +62,4 @@ class Timer:
             t1.stop()
         """
         with self.timer_lock:
-            if self.job_id is not None:
-                Scheduler.get_instance().remove(self.job_id)
-                self.job_id = None
+            self._stop()
