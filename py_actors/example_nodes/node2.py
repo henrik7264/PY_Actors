@@ -22,7 +22,7 @@ from example_nodes.messages import *
 
 class Node2(Node):
     def __init__(self):
-        super().__init__('Node2', 'localhost', 8765, [Msg2, Msg4], [Msg1, Msg3])
+        super().__init__('Node2', 'localhost', 8765, [Msg1, Msg2, Msg3, Msg4])
         self.node.add_peer('Node1', 'localhost', 5678)
         self.node.add_peer('Node3', 'localhost', 6789)
         self.logger.setLevel(logging.NOTSET)

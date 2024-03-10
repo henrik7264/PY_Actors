@@ -58,7 +58,7 @@ def _recv_msg(sock: socket.socket) -> bytes:
 
 
 class PeerNode(Thread):
-    def __init__(self, node, sock, name: str, addr: str, port: int, send_msgs, recv_msgs):
+    def __init__(self, node, sock, name: str, addr: str, port: int, msgs):
         super().__init__(daemon=True)
         self.node = node
         self.sock = sock
@@ -67,20 +67,23 @@ class PeerNode(Thread):
         self.name = name
         self.addr = addr
         self.port = port
-        self.send_msgs = send_msgs
-        self.recv_msgs = recv_msgs
+        self.msgs = msgs
+        self.msgs_to_drop = []
         self.subs = []
-        for msg_type in send_msgs:
+        for msg_type in msgs:
             self.subs.append((self.node.message.subscribe(self.send_to_peer, msg_type), msg_type))
         self.start()
 
     def send_to_peer(self, msg):
-        try:
-            if self.is_connected:
-                _send_msg(self.sock, msg)
-        except socket.error:
-            self.sock.close()
-            self.is_connected = False
+        if msg in self.msgs_to_drop:
+            self.msgs_to_drop.remove(msg)
+        else:
+            try:
+                if self.is_connected:
+                    _send_msg(self.sock, msg)
+            except socket.error:
+                self.sock.close()
+                self.is_connected = False
 
     def run(self):
         do_loop = True
@@ -95,10 +98,11 @@ class PeerNode(Thread):
                         do_loop = False
                 else:
                     msg = _recv_msg(self.sock)
-                    if type(msg) in self.recv_msgs:
+                    if type(msg) in self.msgs:
+                        self.msgs_to_drop.append(msg)
                         self.node.message.publish(msg)
             except pickle.UnpicklingError as err:
-                print(f"Pickle error: {err}.")
+                self.node.logger.error(f"Pickle error: {err}.")
             except socket.error:
                 self.node.conns.pop(self.name)
                 self.sock.close()
@@ -113,7 +117,7 @@ class PeerNode(Thread):
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE,1)  # after idle in sec.
-                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL,3)  # interval between keepalives
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL,1)  # interval between keepalives
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT,5)  # retries
 
                 self.sock.connect((self.addr, self.port))
@@ -134,8 +138,8 @@ class PeerNode(Thread):
 
 
 class Node(Thread, Actor):
-    def __init__(self, name: str, addr: str, port: int, send_msgs=None, recv_msgs=None):
-        assert send_msgs is not None or recv_msgs is not None
+    def __init__(self, name: str, addr: str, port: int, msgs=None):
+        assert msgs is not None
         Thread.__init__(self, daemon=True)
         Actor.__init__(self, name=name)
         self.node = self
@@ -144,12 +148,9 @@ class Node(Thread, Actor):
         if self.addr == 'localhost':
             self.addr = '127.0.0.1'
         self.port = port
-        self.send_msgs = send_msgs
-        if self.send_msgs is None:
-            self.send_msgs = []
-        self.recv_msgs = recv_msgs
-        if self.recv_msgs is None:
-            self.recv_msgs = []
+        self.msgs = msgs
+        if self.msgs is None:
+            self.msgs = []
         self.peers: {PeerNode} = {}
         self.conns: {PeerNode} = {}
         self.lock = Lock()
@@ -171,9 +172,9 @@ class Node(Thread, Actor):
                 if name in self.conns:
                     client_sock.close()
                 else:
-                    self.conns[name] = PeerNode(self, client_sock, name, addr, port, self.send_msgs, self.recv_msgs)
+                    self.conns[name] = PeerNode(self, client_sock, name, addr, port, self.msgs)
 
     def add_peer(self, name: str, addr: str, port: int):
         if addr == 'localhost':
             addr = '127.0.0.1'
-        self.peers[name] = PeerNode(self, None, name, addr, port, self.send_msgs, self.recv_msgs)
+        self.peers[name] = PeerNode(self, None, name, addr, port, self.msgs)

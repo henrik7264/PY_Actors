@@ -21,7 +21,7 @@ from lib_actors.node import Node
 
 class Subscriber(Node):
     def __init__(self):
-        super().__init__('Subscriber', 'localhost', 8765, recv_msgs=[Message])
+        super().__init__('Subscriber', 'localhost', 8765, [Message])
         self.logger.setLevel(logging.NOTSET)
 
         self.count = 0

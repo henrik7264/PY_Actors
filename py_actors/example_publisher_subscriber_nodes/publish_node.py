@@ -20,7 +20,7 @@ from lib_actors.node import Node
 
 class Publisher(Node):
     def __init__(self):
-        super().__init__('Publisher', 'localhost', 5678, send_msgs=[Message])
+        super().__init__('Publisher', 'localhost', 5678, [Message])
         self.node.add_peer('Subscriber', 'localhost', 8765)
 
         self.count = 0

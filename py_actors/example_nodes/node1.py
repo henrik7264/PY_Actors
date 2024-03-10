@@ -22,11 +22,12 @@ from example_nodes.messages import *
 
 class Node1(Node):
     def __init__(self):
-        super().__init__('Node1', 'localhost', 5678, [Msg1], [Msg2])
+        super().__init__('Node1', 'localhost', 5678, [Msg1, Msg2])
         self.node.add_peer('Node2', 'localhost', 8765)
         self.logger.setLevel(logging.NOTSET)
         self.count = 0
         self.scheduler.repeat(1000, self.pub)
+        self.message.subscribe(self.sub1, Msg1)
         self.message.subscribe(self.sub2, Msg2)
 
     def pub(self):
@@ -35,6 +36,9 @@ class Node1(Node):
             self.logger.info("Sending Msg1 ...")
             self.message.publish(Msg1())
         self.count += 1
+
+    def sub1(self, msg: Msg1):
+        self.logger.info("Received Msg1 ...")
 
     def sub2(self, msg: Msg2):
         self.logger.info("Received Msg2 ...")
